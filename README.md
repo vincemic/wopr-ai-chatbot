@@ -4,7 +4,27 @@ A complete Visual Studio Code workspace featuring a WOPR (War Operation Plan Res
 
 ![WOPR Terminal Interface](https://img.shields.io/badge/WOPR-OPERATIONAL-green?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iTjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIgMkgyMlYyMkgyVjJaIiBzdHJva2U9IiMwMEZGMDAiIHN0cm9rZS13aWR0aD0iMiIvPgo8L3N2Zz4K)
 
-## 🎯 Project Overview
+## � Live Demo
+
+**🎮 [Try WOPR Online](https://vincemic.github.io/wopr-ai-chatbot/)**
+
+Experience the authentic 1983 War Games WOPR computer interface directly in your browser! The live demo includes all features: connection prompt, dial-up modem sounds, text-to-speech, and the complete WOPR personality.
+
+### Screenshots
+
+<div align="center">
+
+**Initial Connection Prompt**
+![WOPR Connection Prompt](wopr-interface-screenshot.png)
+
+**Dial-Up Connection Sequence** 
+![WOPR Dial-Up Sequence](wopr-dialup-screenshot.png)
+
+</div>
+
+> **Note**: The live demo uses the frontend-only fallback system, so you'll experience WOPR's personality through the client-side message system. For the full Azure OpenAI integration, follow the local setup instructions below.
+
+## �🎯 Project Overview
 
 This workspace contains two interconnected projects delivering an authentic WOPR experience:
 
