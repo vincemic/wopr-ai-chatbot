@@ -74,4 +74,47 @@ test.describe('WOPR Chat Interface', () => {
     const speakButton = page.locator('.speak-btn').first();
     await expect(speakButton).toBeVisible();
   });
+
+  test('should show connection prompt and accept click to connect', async ({ page }) => {
+    // Start fresh by going to the page
+    await page.goto('/');
+    
+    // Should show connection prompt initially
+    await expect(page.locator('.connection-prompt')).toBeVisible();
+    await expect(page.locator('.prompt-text')).toContainText('Connect?');
+    await expect(page.locator('.prompt-options')).toContainText('y/n');
+    
+    // Click anywhere on the connection prompt
+    await page.locator('.connection-prompt').click();
+    
+    // Should start dial-up sequence
+    await expect(page.locator('.dialup-screen')).toBeVisible();
+    await expect(page.locator('.dialup-text')).toContainText('ESTABLISHING CONNECTION');
+    
+    // Wait for connection to complete and interface to show
+    await expect(page.locator('.wopr-interface')).toBeVisible({ timeout: 15000 });
+  });
+
+  test('should show mobile hint on touch devices', async ({ page, isMobile }) => {
+    if (isMobile) {
+      // On mobile devices, should show mobile hint
+      await expect(page.locator('.mobile-hint')).toBeVisible();
+      await expect(page.locator('.mobile-hint')).toContainText('Tap anywhere to connect');
+    }
+  });
+
+  test('should accept keyboard input for connection prompt', async ({ page }) => {
+    // Start fresh
+    await page.goto('/');
+    
+    // Should show connection prompt
+    await expect(page.locator('.connection-prompt')).toBeVisible();
+    
+    // Press 'y' key
+    await page.keyboard.press('y');
+    
+    // Should start dial-up sequence
+    await expect(page.locator('.dialup-screen')).toBeVisible();
+    await expect(page.locator('.dialup-text')).toContainText('ESTABLISHING CONNECTION');
+  });
 });

@@ -1,10 +1,11 @@
 <div class="wopr-terminal" (keydown)="onConnectionKeyPress($event)" tabindex="0">
   
   <!-- Connection Prompt Screen -->
-  <div class="connection-prompt" *ngIf="showConnectionPrompt">
+  <div class="connection-prompt" *ngIf="showConnectionPrompt" (click)="onConnectionClick($event)" (touchstart)="onConnectionTouch($event)">
     <div class="prompt-container">
       <div class="prompt-text">Connect?</div>
       <div class="prompt-options">y/n</div>
+      <div class="mobile-hint">Tap anywhere to connect</div>
     </div>
   </div>
 

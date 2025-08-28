@@ -242,6 +242,59 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
     }
   }
 
+  onConnectionClick(event: MouseEvent) {
+    if (!this.showConnectionPrompt) return;
+    
+    // Prevent event bubbling
+    event.stopPropagation();
+    
+    // Add visual feedback for desktop users
+    this.addConnectionFeedback();
+    
+    // Accept click as "yes" for mobile devices and desktop
+    this.connectToWopr();
+  }
+
+  onConnectionTouch(event: TouchEvent) {
+    if (!this.showConnectionPrompt) return;
+    
+    // Prevent event bubbling and default behavior
+    event.stopPropagation();
+    event.preventDefault();
+    
+    // Add haptic feedback if available
+    this.addHapticFeedback();
+    
+    // Add visual feedback
+    this.addConnectionFeedback();
+    
+    // Accept touch as "yes" for mobile devices
+    this.connectToWopr();
+  }
+
+  private addConnectionFeedback() {
+    // Provide immediate visual feedback by temporarily changing the prompt
+    const promptElement = document.querySelector('.prompt-text');
+    if (promptElement) {
+      const originalText = promptElement.textContent;
+      promptElement.textContent = 'CONNECTING...';
+      
+      // Reset after a brief moment (this will be overridden by the actual connection process)
+      setTimeout(() => {
+        if (promptElement.textContent === 'CONNECTING...') {
+          promptElement.textContent = originalText;
+        }
+      }, 500);
+    }
+  }
+
+  private addHapticFeedback() {
+    // Add haptic feedback for mobile devices if available
+    if ('vibrate' in navigator) {
+      navigator.vibrate(50); // Short vibration
+    }
+  }
+
   async connectToWopr() {
     this.showConnectionPrompt = false;
     this.isDialingUp = true;
