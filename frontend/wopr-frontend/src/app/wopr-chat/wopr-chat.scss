@@ -441,6 +441,28 @@
     min-width: 70px;
     padding: 6px 12px;
   }
+  
+  // Mobile-specific dialup screen adjustments
+  .dialup-screen {
+    // Ensure proper z-index and visibility on mobile
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    
+    .dialup-container {
+      padding: 20px;
+      
+      .dialup-text {
+        font-size: 1.5rem; // Slightly smaller on mobile
+        margin-bottom: 1.5rem;
+      }
+      
+      .dialup-status {
+        font-size: 1rem; // Slightly smaller on mobile
+      }
+    }
+  }
 }
 
 // Input cursor blink animation

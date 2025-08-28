@@ -146,8 +146,14 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   private async playDialupSound(): Promise<void> {
+    // Ensure minimum display time for dialup screen (especially important on mobile)
+    const minDisplayTime = 2000; // Reduced to 2 seconds since user interaction enables audio
+    const startTime = Date.now();
+    
     if (!this.dialupEnabled || !this.dialupAudio) {
-      console.log('WOPR: Dial-up sound disabled or not available');
+      console.log('WOPR: Dial-up sound disabled or not available - showing dialup screen for minimum time');
+      // Still show the dialup screen for minimum time even if audio is disabled
+      await new Promise(resolve => setTimeout(resolve, minDisplayTime));
       return;
     }
 
@@ -161,47 +167,75 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
           console.log('WOPR: Dial-up modem sound finished playing');
           this.dialupAudio!.removeEventListener('ended', onEnded);
           this.dialupAudio!.removeEventListener('error', onError);
-          resolve();
+          
+          // If audio played successfully, we can finish immediately or with minimal delay
+          const elapsed = Date.now() - startTime;
+          if (elapsed >= 1500) { // Audio played for reasonable time
+            resolve();
+          } else {
+            // Ensure at least some minimum time has passed
+            const remainingTime = Math.max(0, 1500 - elapsed);
+            setTimeout(() => resolve(), remainingTime);
+          }
         };
         
         const onError = (error: any) => {
           console.warn('WOPR: Dial-up sound error during playback', error);
           this.dialupAudio!.removeEventListener('ended', onEnded);
           this.dialupAudio!.removeEventListener('error', onError);
-          resolve(); // Still resolve to continue the flow
+          
+          // Ensure minimum display time even on error
+          const elapsed = Date.now() - startTime;
+          const remainingTime = Math.max(0, minDisplayTime - elapsed);
+          
+          if (remainingTime > 0) {
+            console.log(`WOPR: Audio error - showing dialup screen for remaining ${remainingTime}ms`);
+            setTimeout(() => resolve(), remainingTime);
+          } else {
+            resolve();
+          }
         };
         
         this.dialupAudio!.addEventListener('ended', onEnded);
         this.dialupAudio!.addEventListener('error', onError);
         
-        // Try to play the sound
+        // Try to play the sound (should work now due to user interaction)
         const playPromise = this.dialupAudio!.play();
         
         if (playPromise !== undefined) {
           playPromise.then(() => {
-            console.log('WOPR: Dial-up modem sound started playing');
+            console.log('WOPR: Dial-up modem sound started playing successfully after user interaction');
           }).catch((error: any) => {
-            console.warn('WOPR: Failed to play dial-up sound - this is normal on first load due to browser autoplay policies', error);
+            console.warn('WOPR: Dial-up sound still failed after user interaction', error);
             
-            // If autoplay is blocked, we'll add a user interaction handler
-            if (error.name === 'NotAllowedError') {
-              console.log('WOPR: Autoplay blocked - dial-up sound will play after user interaction');
-              this.addAutoplayHandler();
-              // For autoplay blocked, resolve immediately so the flow continues
-              this.dialupAudio!.removeEventListener('ended', onEnded);
-              this.dialupAudio!.removeEventListener('error', onError);
-              resolve();
+            // Clean up listeners and ensure minimum display time
+            this.dialupAudio!.removeEventListener('ended', onEnded);
+            this.dialupAudio!.removeEventListener('error', onError);
+            
+            const elapsed = Date.now() - startTime;
+            const remainingTime = Math.max(0, minDisplayTime - elapsed);
+            
+            if (remainingTime > 0) {
+              console.log(`WOPR: Audio still blocked - showing dialup screen for ${remainingTime}ms`);
+              setTimeout(() => resolve(), remainingTime);
             } else {
-              // For other errors, still resolve to continue
-              this.dialupAudio!.removeEventListener('ended', onEnded);
-              this.dialupAudio!.removeEventListener('error', onError);
               resolve();
             }
           });
         }
       } catch (error: any) {
         console.warn('WOPR: Exception during dial-up sound playback', error);
-        resolve(); // Still resolve to continue the flow
+        
+        // Ensure minimum display time even on exception
+        const elapsed = Date.now() - startTime;
+        const remainingTime = Math.max(0, minDisplayTime - elapsed);
+        
+        if (remainingTime > 0) {
+          console.log(`WOPR: Exception occurred - showing dialup screen for remaining ${remainingTime}ms`);
+          setTimeout(() => resolve(), remainingTime);
+        } else {
+          resolve();
+        }
       }
     });
   }
@@ -226,12 +260,43 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
     document.addEventListener('keydown', enableAudio, { once: true });
   }
 
+  private enableAudioOnUserInteraction() {
+    // Enable audio context and dialup audio on user interaction
+    console.log('WOPR: Enabling audio on user interaction for mobile compatibility');
+    
+    // Resume audio context if suspended
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      this.audioContext.resume().then(() => {
+        console.log('WOPR: Audio context resumed successfully');
+      }).catch(err => {
+        console.warn('WOPR: Failed to resume audio context', err);
+      });
+    }
+    
+    // Preload and enable dialup audio
+    if (this.dialupAudio && this.dialupEnabled) {
+      // Try to play and immediately pause to unlock audio
+      this.dialupAudio.muted = true; // Mute so user doesn't hear the test
+      this.dialupAudio.play().then(() => {
+        console.log('WOPR: Dialup audio enabled successfully on user interaction');
+        this.dialupAudio!.pause();
+        this.dialupAudio!.currentTime = 0;
+        this.dialupAudio!.muted = false; // Unmute for actual playback
+      }).catch(err => {
+        console.log('WOPR: Note - dialup audio will be handled during connection sequence');
+        this.dialupAudio!.muted = false; // Ensure it's unmuted
+      });
+    }
+  }
+
   // Connection prompt handling
   onConnectionKeyPress(event: KeyboardEvent) {
     if (!this.showConnectionPrompt) return;
     
     const key = event.key.toLowerCase();
     if (key === 'y') {
+      // Enable audio on user interaction (important for mobile)
+      this.enableAudioOnUserInteraction();
       this.connectToWopr();
     } else if (key === 'n') {
       this.declineConnection();
@@ -243,6 +308,9 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
     
     // Prevent event bubbling
     event.stopPropagation();
+    
+    // Enable audio on user interaction (important for mobile)
+    this.enableAudioOnUserInteraction();
     
     // Add visual feedback for desktop users
     this.addConnectionFeedback();
@@ -257,6 +325,9 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
     // Prevent event bubbling and default behavior
     event.stopPropagation();
     event.preventDefault();
+    
+    // Enable audio on user interaction (important for mobile)
+    this.enableAudioOnUserInteraction();
     
     // Add haptic feedback if available
     this.addHapticFeedback();
