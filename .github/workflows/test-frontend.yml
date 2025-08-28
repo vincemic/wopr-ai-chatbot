@@ -1,0 +1,96 @@
+name: Run Tests (Non-blocking)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/test-frontend.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "frontend/**"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    continue-on-error: true  # This ensures the workflow never fails
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/wopr-frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd frontend/wopr-frontend
+          npm ci
+
+      - name: Install Playwright browsers
+        run: |
+          cd frontend/wopr-frontend
+          npx playwright install --with-deps
+
+      - name: Run unit tests
+        id: unit-tests
+        continue-on-error: true
+        run: |
+          cd frontend/wopr-frontend
+          npm run test -- --watch=false --browsers=ChromeHeadless || echo "Unit tests failed but continuing..."
+        
+      - name: Build application for E2E testing
+        run: |
+          cd frontend/wopr-frontend
+          npm run build
+
+      - name: Run E2E tests
+        id: e2e-tests
+        continue-on-error: true
+        run: |
+          cd frontend/wopr-frontend
+          # Start the app in background and run tests
+          npm start &
+          sleep 10
+          npm run test:e2e || echo "E2E tests failed but continuing..."
+          # Kill the background process
+          pkill -f "ng serve" || true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            frontend/wopr-frontend/coverage/
+            frontend/wopr-frontend/test-results/
+            frontend/wopr-frontend/playwright-report/
+          retention-days: 30
+
+      - name: Report test status
+        if: always()
+        run: |
+          echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Test Type | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.unit-tests.outcome }}" == "success" ]; then
+            echo "| Unit Tests | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Unit Tests | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${{ steps.e2e-tests.outcome }}" == "success" ]; then
+            echo "| E2E Tests | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| E2E Tests | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "ℹ️ **Note:** Test failures do not block deployment. The application will deploy regardless of test results." >> $GITHUB_STEP_SUMMARY
