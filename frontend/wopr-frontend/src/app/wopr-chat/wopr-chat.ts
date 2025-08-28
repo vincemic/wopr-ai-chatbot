@@ -61,6 +61,9 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
     '',
     'GREETINGS PROFESSOR FALKEN.',
     '',
+    'SYSTEM COMMANDS AVAILABLE.',
+    'TYPE /HELP FOR COMMAND LIST.',
+    '',
     'HOW ABOUT A NICE GAME OF CHESS?'
   ];
 
@@ -438,16 +441,9 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
     const userMessage = this.currentMessage.trim();
     this.currentMessage = '';
 
-    // Handle debug commands
-    if (userMessage.toLowerCase() === '/test-dialup') {
-      this.messages.push({
-        role: 'user',
-        content: userMessage,
-        timestamp: new Date()
-      });
-      
-      await this.typeMessage('TESTING DIAL-UP MODEM SOUND...', 'system');
-      await this.playDialupSound();
+    // Handle slash commands
+    if (userMessage.startsWith('/')) {
+      await this.processSlashCommand(userMessage);
       return;
     }
 
@@ -502,6 +498,7 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
         this.messages = [];
         this.gameState = null;
         this.addSystemMessage('WOPR SYSTEMS RESET. ALL GAME STATES CLEARED.');
+        this.addSystemMessage('TYPE /HELP FOR COMMAND LIST.');
         this.addSystemMessage('SHALL WE PLAY A GAME?');
         // Focus input after reset messages
         setTimeout(() => this.focusInput(), 2000); // Wait for messages to finish typing
@@ -513,6 +510,7 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
           this.gameState = null;
           this.addSystemMessage('WOPR AI OFFLINE - LOCAL RESET INITIATED.');
           this.addSystemMessage('BACKUP SYSTEMS CLEARED. GAME DATABASE READY.');
+          this.addSystemMessage('TYPE /HELP FOR COMMAND LIST.');
           this.addSystemMessage('SHALL WE PLAY A GAME?');
           setTimeout(() => this.focusInput(), 2000);
         } else {
@@ -664,6 +662,99 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
     }
     
     speechSynthesis.speak(utterance);
+  }
+
+  async processSlashCommand(command: string) {
+    const cmd = command.toLowerCase();
+    
+    // Add the command to message history
+    this.messages.push({
+      role: 'user',
+      content: command,
+      timestamp: new Date()
+    });
+
+    // Process different slash commands
+    switch (cmd) {
+      case '/help':
+        await this.showHelp();
+        break;
+      
+      case '/tts':
+      case '/voice':
+        this.toggleTextToSpeech();
+        break;
+      
+      case '/beep':
+      case '/audio':
+        this.toggleBeepSound();
+        break;
+      
+      case '/dialup':
+      case '/modem':
+        this.toggleDialupSound();
+        break;
+      
+      case '/test-dialup':
+        await this.typeMessage('TESTING DIAL-UP MODEM SOUND...', 'system');
+        await this.playDialupSound();
+        break;
+      
+      case '/reset':
+        this.resetSystem();
+        break;
+      
+      case '/status':
+        await this.showStatus();
+        break;
+      
+      case '/clear':
+        this.messages = [];
+        await this.typeMessage('TERMINAL CLEARED', 'system');
+        break;
+      
+      default:
+        await this.typeMessage(`UNKNOWN COMMAND: ${command}
+Type /help for available commands`, 'system');
+        break;
+    }
+    
+    // Return focus to input
+    setTimeout(() => this.focusInput(), 1000);
+  }
+
+  async showHelp() {
+    const helpText = `WOPR COMMAND REFERENCE:
+
+/help         - Show this help menu
+/tts, /voice  - Toggle text-to-speech synthesis
+/beep, /audio - Toggle terminal beep sounds  
+/dialup, /modem - Toggle dial-up modem sounds
+/status       - Show current system status
+/reset        - Reset WOPR systems
+/clear        - Clear terminal screen
+/test-dialup  - Test dial-up modem sound
+
+Additional commands:
+- Ask me about games (Global Thermonuclear War, Chess, etc.)
+- Request system diagnostics
+- Engage in strategic conversation`;
+
+    await this.typeMessage(helpText, 'system');
+  }
+
+  async showStatus() {
+    const statusText = `WOPR SYSTEM STATUS:
+
+CONNECTION: ${this.isConnecting ? 'ESTABLISHING...' : 'ONLINE'}
+VOICE SYNTHESIS: ${this.textToSpeechEnabled ? 'ENABLED' : 'DISABLED'}
+TERMINAL AUDIO: ${this.beepEnabled ? 'ENABLED' : 'DISABLED'}
+MODEM AUDIO: ${this.dialupEnabled ? 'ENABLED' : 'DISABLED'}
+CURRENT GAME: ${this.gameState?.currentGame || 'NONE'}
+ACTIVE SESSIONS: 1
+SYSTEM TIME: ${new Date().toISOString()}`;
+
+    await this.typeMessage(statusText, 'system');
   }
 
   getMessageClass(role: string): string {

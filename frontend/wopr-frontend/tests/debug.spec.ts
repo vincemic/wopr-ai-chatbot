@@ -113,10 +113,6 @@ test.describe('WOPR Debug', () => {
       // Check if messages appeared
       const messages = await page.locator('.message').count();
       console.log('Message count:', messages);
-      
-      // Check loading state
-      const isConnecting = await page.locator('.loading-overlay').isVisible();
-      console.log('Loading overlay visible:', isConnecting);
     }
     
     // This test always passes - it's just for debugging

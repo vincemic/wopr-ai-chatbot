@@ -15,7 +15,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    continue-on-error: true  # This ensures the workflow never fails
+    continue-on-error: true # This ensures the workflow never fails
 
     steps:
       - name: Checkout repository
@@ -44,7 +44,7 @@ jobs:
         run: |
           cd frontend/wopr-frontend
           npm run test -- --watch=false --browsers=ChromeHeadless || echo "Unit tests failed but continuing..."
-        
+
       - name: Build application for E2E testing
         run: |
           cd frontend/wopr-frontend
@@ -79,18 +79,18 @@ jobs:
           echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
           echo "| Test Type | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "${{ steps.unit-tests.outcome }}" == "success" ]; then
             echo "| Unit Tests | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
           else
             echo "| Unit Tests | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           if [ "${{ steps.e2e-tests.outcome }}" == "success" ]; then
             echo "| E2E Tests | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
           else
             echo "| E2E Tests | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "ℹ️ **Note:** Test failures do not block deployment. The application will deploy regardless of test results." >> $GITHUB_STEP_SUMMARY

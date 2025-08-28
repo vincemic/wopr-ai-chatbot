@@ -365,7 +365,8 @@ test.describe('WOPR Fallback System', () => {
       // Should show local reset message
       await expect(page.locator('.message').last()).toContainText('LOCAL RESET INITIATED', { timeout: 10000 });
       await expect(page.locator('.message')).toContainText('BACKUP SYSTEMS CLEARED');
-      await expect(page.locator('.message')).toContainText('STANDALONE MODE CONTINUES');
+      await expect(page.locator('.message')).toContainText('TYPE /HELP FOR COMMAND LIST');
+      await expect(page.locator('.message')).toContainText('SHALL WE PLAY A GAME?');
       
       // Messages should be cleared except for the reset confirmation
       const messages = page.locator('.message');
@@ -382,6 +383,7 @@ test.describe('WOPR Fallback System', () => {
       // Reset the system
       await page.locator('.reset-button').click();
       await expect(page.locator('.message').last()).toContainText('LOCAL RESET INITIATED', { timeout: 10000 });
+      await expect(page.locator('.message')).toContainText('TYPE /HELP FOR COMMAND LIST');
       
       // Send a message after reset
       const input = page.locator('.message-input');

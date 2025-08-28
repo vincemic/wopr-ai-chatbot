@@ -1,7 +1,11 @@
-<div class="wopr-terminal" (keydown)="onConnectionKeyPress($event)" tabindex="0">
+<div class="wopr-terminal" tabindex="0">
   
   <!-- Connection Prompt Screen -->
-  <div class="connection-prompt" *ngIf="showConnectionPrompt" (click)="onConnectionClick($event)" (touchstart)="onConnectionTouch($event)">
+  <div class="connection-prompt" *ngIf="showConnectionPrompt" 
+       (keydown)="onConnectionKeyPress($event)"
+       (click)="onConnectionClick($event)" 
+       (touchstart)="onConnectionTouch($event)"
+       tabindex="0">
     <div class="prompt-container">
       <div class="prompt-text">Connect?</div>
       <div class="prompt-options">y/n</div>
@@ -60,14 +64,6 @@
               [class.typing]="isTyping && message === messages[messages.length - 1]">
           {{ message.content }}
         </span>
-        
-        <!-- Text-to-speech button for WOPR messages -->
-        <button class="speak-btn" 
-                *ngIf="message.role === 'assistant' && message.content"
-                (click)="speakMessage(message.content)"
-                title="Speak message">
-          🔊
-        </button>
       </div>
       
       <div class="message-timestamp">
@@ -96,7 +92,7 @@
              [(ngModel)]="currentMessage"
              (keypress)="onKeyPress($event)"
              [disabled]="isConnecting || isTyping"
-             placeholder="Enter command..."
+             placeholder="Enter command or /help for options..."
              autocomplete="off">
       
       <button class="send-button" 
@@ -111,36 +107,6 @@
               title="Reset WOPR Systems">
         RESET
       </button>
-      
-      <button class="tts-toggle-button" 
-              (click)="toggleTextToSpeech()"
-              [class.enabled]="textToSpeechEnabled"
-              title="Toggle automatic text-to-speech">
-        {{ textToSpeechEnabled ? '🔊' : '🔇' }}
-      </button>
-      
-      <button class="beep-toggle-button" 
-              (click)="toggleBeepSound()"
-              [class.enabled]="beepEnabled"
-              title="Toggle terminal beep sounds">
-        {{ beepEnabled ? '🔔' : '🔕' }}
-      </button>
-      
-      <button class="dialup-toggle-button" 
-              (click)="toggleDialupSound()"
-              [class.enabled]="dialupEnabled"
-              title="Toggle dial-up modem sound">
-        {{ dialupEnabled ? '📞' : '📵' }}
-      </button>
-    </div>
-  </div>
-
-  <!-- Loading overlay -->
-  <div class="loading-overlay" *ngIf="isConnecting">
-    <div class="loading-text">
-      <div class="loading-line">ESTABLISHING CONNECTION TO WOPR...</div>
-      <div class="loading-line">AUTHENTICATING SECURITY PROTOCOLS...</div>
-      <div class="loading-line">INITIALIZING WAR GAMES INTERFACE...</div>
     </div>
   </div>
 

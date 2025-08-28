@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 import { ChatRequest, ChatResponse, WoprGameState, WoprStatus } from '../models/wopr.models';
 
 @Injectable({
@@ -9,7 +10,8 @@ import { ChatRequest, ChatResponse, WoprGameState, WoprStatus } from '../models/
 })
 export class WoprApi {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'https://localhost:7000/api'; // Update this for production
+  private readonly baseUrl = environment.apiUrl;
+  private readonly healthUrl = environment.healthUrl;
   
   private gameStateSubject = new BehaviorSubject<WoprGameState | null>(null);
   public gameState$ = this.gameStateSubject.asObservable();
@@ -50,7 +52,7 @@ export class WoprApi {
   }
 
   checkHealth(): Observable<any> {
-    return this.http.get(`${this.baseUrl.replace('/api', '')}/health`, this.httpOptions)
+    return this.http.get(`${this.healthUrl}/health`, this.httpOptions)
       .pipe(catchError(this.handleError));
   }
 
@@ -59,7 +61,10 @@ export class WoprApi {
   }
 
   private handleError = (error: any): Observable<never> => {
-    console.error('WOPR API Error:', error);
+    if (environment.enableLogging) {
+      console.error('WOPR API Error:', error);
+    }
+    
     let errorMessage = 'SYSTEM ERROR: Communication with WOPR failed';
     
     if (error.error?.message) {

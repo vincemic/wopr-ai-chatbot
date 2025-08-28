@@ -40,7 +40,7 @@ jobs:
       - name: Build Angular application
         run: |
           cd frontend/wopr-frontend
-          npm run build -- --base-href /wopr-ai-chatbot/
+          npm run build -- --configuration github
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

@@ -63,11 +63,6 @@ body::before {
     0 0 15px var(--crt-green);
 }
 
-/* Typing cursor - static */
-.typing {
-  border-right: 2px solid var(--crt-green);
-}
-
 /* WOPR specific styles */
 .wopr-title {
   color: var(--crt-amber);
