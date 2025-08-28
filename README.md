@@ -250,6 +250,16 @@ See [DEBUG.md](DEBUG.md) for detailed debugging guide.
 
 ## 🚀 Deployment
 
+### GitHub Actions CI/CD
+
+This project includes automated deployment with non-blocking testing:
+
+- **Deployment**: Automatically deploys to GitHub Pages on push to `main`
+- **Testing**: Runs comprehensive tests without blocking deployment
+- **Documentation**: See [CI/CD Configuration](.github/CI_CD_README.md) for details
+
+**Key Feature**: Failed tests never prevent deployment, ensuring maximum uptime and fast emergency fixes.
+
 ### Azure App Service (Backend)
 
 1. Create an Azure App Service
