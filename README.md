@@ -24,6 +24,9 @@ Experience the authentic 1983 War Games WOPR computer interface directly in your
 **Dial-Up Connection Sequence** 
 ![WOPR Dial-Up Sequence](wopr-dialup-screenshot.png)
 
+**Chat Interface with WOPR**
+![WOPR Chat Interface](wopr-chat-screenshot.png)
+
 </div>
 
 > **Note**: The live demo uses the frontend-only fallback system, so you'll experience WOPR's personality through the client-side message system. For the full Azure OpenAI integration, follow the local setup instructions below.

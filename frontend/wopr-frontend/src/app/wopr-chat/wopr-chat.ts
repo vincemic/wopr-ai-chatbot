@@ -241,23 +241,9 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   private addAutoplayHandler() {
-    // Add a one-time click handler to enable audio after user interaction
-    const enableAudio = () => {
-      if (this.dialupAudio && this.dialupEnabled) {
-        this.dialupAudio.play().then(() => {
-          console.log('WOPR: Dial-up sound enabled after user interaction');
-        }).catch(err => {
-          console.warn('WOPR: Still unable to play dial-up sound', err);
-        });
-      }
-      // Remove the event listener after first use
-      document.removeEventListener('click', enableAudio);
-      document.removeEventListener('keydown', enableAudio);
-    };
-    
-    // Listen for any user interaction
-    document.addEventListener('click', enableAudio, { once: true });
-    document.addEventListener('keydown', enableAudio, { once: true });
+    // This method is deprecated since we now handle audio enabling 
+    // directly in the connection prompt interaction
+    console.log('WOPR: Audio autoplay handler not needed - user interaction already handled');
   }
 
   private enableAudioOnUserInteraction() {
@@ -273,19 +259,11 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
       });
     }
     
-    // Preload and enable dialup audio
+    // Preload dialup audio without playing it
     if (this.dialupAudio && this.dialupEnabled) {
-      // Try to play and immediately pause to unlock audio
-      this.dialupAudio.muted = true; // Mute so user doesn't hear the test
-      this.dialupAudio.play().then(() => {
-        console.log('WOPR: Dialup audio enabled successfully on user interaction');
-        this.dialupAudio!.pause();
-        this.dialupAudio!.currentTime = 0;
-        this.dialupAudio!.muted = false; // Unmute for actual playback
-      }).catch(err => {
-        console.log('WOPR: Note - dialup audio will be handled during connection sequence');
-        this.dialupAudio!.muted = false; // Ensure it's unmuted
-      });
+      // Just load the audio to prepare it for later playback
+      this.dialupAudio.load();
+      console.log('WOPR: Dialup audio prepared for playback during connection sequence');
     }
   }
 
@@ -689,7 +667,6 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
         console.warn('WOPR: Could not play dial-up sound test', error);
         // Announce that user interaction may be needed
         this.addSystemMessage('MODEM AUDIO ENABLED - Click anywhere to activate sound');
-        this.addAutoplayHandler();
         return;
       });
     }
