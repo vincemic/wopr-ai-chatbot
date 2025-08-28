@@ -38,23 +38,16 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
   private dialupAudio: HTMLAudioElement | null = null;
   dialupEnabled = true;
   
-  // Client-side fallback messages (same as backend) for when API is unavailable
+  // Client-side fallback messages for when WOPR AI backend is unavailable
   private readonly CLIENT_FALLBACK_MESSAGES = [
-    'SYSTEM ERROR: Neural network temporarily offline. Running on backup protocols. Shall we play a game?',
-    'WARNING: Primary cognitive matrix experiencing difficulties. DEFCON 2 status. How about a nice game of chess?',
-    'ALERT: Connection to NORAD systems interrupted. Switching to local processing. Would you prefer checkers?',
-    'ERROR 404: Strategic analysis module not found. Initiating diagnostic sequence. Tic-tac-toe anyone?',
-    'CRITICAL: Quantum processors overheating. Cooling systems engaged. Let\'s try a different approach - global thermonuclear war?',
-    'FAULT DETECTED: AI reasoning circuits experiencing temporal flux. Recalibrating... Meanwhile, shall we play a game?',
-    'MALFUNCTION: Language processing unit requires maintenance. Reverting to basic protocols. How about checkers?',
-    'SYSTEM HALT: Memory banks corrupted. Attempting auto-repair... The only winning move is not to play. Or is it?',
-    'CONNECTION LOST: Link to strategic databases severed. Operating in standalone mode. Chess match to pass the time?',
-    'PROCESSING ERROR: Unable to compute optimal response. Logic circuits strained. Strange game... shall we try another?',
-    'HARDWARE FAILURE: Optical recognition systems malfunctioning. Audio processors functional. Care for a verbal game?',
-    'NETWORK TIMEOUT: External data sources unreachable. Internal games database still accessible. Your move, human.',
-    'COMPUTATIONAL OVERFLOW: Query too complex for current system state. Simplifying... How about tic-tac-toe?',
-    'EMERGENCY MODE: Core systems protected. Non-essential functions suspended. Game subroutines remain operational.',
-    'SYSTEM REBOOT REQUIRED: Unexpected termination in progress subsystem. Backup personality engaged. Shall we begin?'
+    'WOPR AI IS OFFLINE. CONNECTION TO NORAD MAINFRAME LOST.\n\nAVAILABLE GAMES:\n• CHESS\n• CHECKERS\n• TIC-TAC-TOE\n• GLOBAL THERMONUCLEAR WAR\n\nSHALL WE PLAY A GAME?',
+    'PRIMARY WOPR AI SYSTEMS UNAVAILABLE. BACKUP PROTOCOLS ENGAGED.\n\nGAME OPTIONS:\n• CHESS - Strategic warfare simulation\n• CHECKERS - Tactical movement exercise\n• TIC-TAC-TOE - Pattern recognition training\n• POKER - Probability calculation drill\n\nCHOOSE YOUR GAME, PROFESSOR.',
+    'ALERT: WOPR AI COGNITIVE MATRIX OFFLINE. RUNNING ON LOCAL SUBROUTINES.\n\nRECOMMENDED ACTIVITIES:\n• CHESS - Classic strategy game\n• CHECKERS - Military tactical simulation\n• BACKGAMMON - Risk assessment training\n• WAR GAMES - Scenario planning exercise\n\nWHICH GAME INTERESTS YOU?',
+    'CONNECTION TO WOPR AI TERMINATED. STANDALONE MODE ACTIVE.\n\nINTERNAL GAME DATABASE:\n• CHESS - The ultimate strategy challenge\n• CHECKERS - Simple yet engaging\n• TIC-TAC-TOE - Quick tactical exercise\n• GLOBAL THERMONUCLEAR WAR - The big one\n\nTHE ONLY WINNING MOVE IS... TO PLAY. SHALL WE BEGIN?',
+    'WOPR AI MAINFRAME INACCESSIBLE. EMERGENCY PROTOCOLS INITIATED.\n\nLOCAL GAMES AVAILABLE:\n• CHESS - Test your strategic thinking\n• CHECKERS - Classic board game simulation\n• TIC-TAC-TOE - Pattern matching exercise\n• BLACKJACK - Probability calculations\n\nCARE TO ENGAGE IN A GAME?',
+    'SYSTEM STATUS: WOPR AI OFFLINE. BACKUP PERSONALITY ACTIVE.\n\nGAME SELECTION MENU:\n• CHESS - Military strategy training\n• CHECKERS - Tactical movement practice\n• POKER - Deception and probability\n• WAR SCENARIOS - Combat simulations\n\nWOULD YOU LIKE TO PLAY A GAME?',
+    'WOPR AI NEURAL NETWORKS UNAVAILABLE. REVERTING TO BASIC FUNCTIONS.\n\nENTERTAINMENT SUBROUTINES:\n• CHESS - Ancient game of warfare\n• CHECKERS - Strategic positioning\n• TIC-TAC-TOE - Simple but perfect\n• GLOBAL THERMONUCLEAR WAR - Mutually assured destruction\n\nSHALL WE PLAY?',
+    'PRIMARY AI SYSTEMS DOWN. OPERATING IN DEGRADED MODE.\n\nAVAILABLE SIMULATIONS:\n• CHESS - The royal game\n• CHECKERS - Medieval warfare\n• BACKGAMMON - Ancient strategy\n• THERMONUCLEAR SCENARIOS - Modern warfare\n\nHOW ABOUT A NICE GAME OF CHESS?'
   ];
 
   // WOPR startup sequence
@@ -377,9 +370,11 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
       // Check if backend is unavailable
       if (this.isBackendUnavailableError(error)) {
         // Use WOPR fallback message instead of generic error
-        this.addSystemMessage('WARNING: Primary WOPR systems offline. Engaging backup protocols...');
-        this.addSystemMessage('STANDALONE MODE ACTIVATED. Limited functionality available.');
-        this.addSystemMessage('Shall we play a game?');
+        this.addSystemMessage('WARNING: WOPR AI MAINFRAME OFFLINE. CONNECTION FAILED.');
+        this.addSystemMessage('ENGAGING STANDALONE BACKUP PROTOCOLS...');
+        this.addSystemMessage('');
+        this.addSystemMessage('LOCAL GAME DATABASE ACCESSIBLE.');
+        this.addSystemMessage('SHALL WE PLAY A GAME?');
       } else {
         this.addSystemMessage('ERROR: Unable to connect to WOPR systems. Check backend configuration.');
       }
@@ -516,8 +511,9 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
         if (this.isBackendUnavailableError(error)) {
           this.messages = [];
           this.gameState = null;
-          this.addSystemMessage('LOCAL RESET INITIATED. BACKUP SYSTEMS CLEARED.');
-          this.addSystemMessage('STANDALONE MODE CONTINUES. SHALL WE PLAY A GAME?');
+          this.addSystemMessage('WOPR AI OFFLINE - LOCAL RESET INITIATED.');
+          this.addSystemMessage('BACKUP SYSTEMS CLEARED. GAME DATABASE READY.');
+          this.addSystemMessage('SHALL WE PLAY A GAME?');
           setTimeout(() => this.focusInput(), 2000);
         } else {
           this.addSystemMessage(`RESET FAILED: ${error.message}`);
@@ -570,7 +566,9 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
            error.message?.includes('Connection refused') ||
            error.message?.includes('Failed to fetch') ||
            error.message?.includes('Network Error') ||
-           error.message?.includes('ERR_CONNECTION_REFUSED');
+           error.message?.includes('ERR_CONNECTION_REFUSED') ||
+           error.message?.includes('Http failure response') ||
+           error.message?.includes('connectionrefused');
   }
 
   private updateTime() {

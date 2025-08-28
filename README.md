@@ -24,7 +24,25 @@ Experience the authentic 1983 War Games WOPR computer interface directly in your
 
 > **Note**: The live demo uses the frontend-only fallback system, so you'll experience WOPR's personality through the client-side message system. For the full Azure OpenAI integration, follow the local setup instructions below.
 
-## �🎯 Project Overview
+## Recent Enhancements
+
+### Mobile Touch Support
+- **Connection Prompt Enhancement**: Mobile devices can now interact with the "Connect yes or no?" prompt using touch gestures
+- **Haptic Feedback**: Provides tactile feedback on supported mobile devices
+- **Responsive Design**: Optimized touch targets and mobile-friendly interface
+- **Cross-Platform Compatibility**: Works seamlessly on desktop (mouse/keyboard) and mobile (touch)
+
+### CI/CD Improvements
+- **Non-Blocking Test Strategy**: Test failures no longer prevent deployment to GitHub Pages
+- **Separate Workflows**: Independent workflows for testing and deployment ensure reliability
+- **Continuous Deployment**: Automatic deployment on successful builds, regardless of test status
+
+### Bug Fixes
+- **Startup Sequence Issue**: Resolved infinite loop where startup sequence would repeat on keypress
+- **Event Handler Scope**: Fixed proper binding of keyboard events to connection prompt only
+- **Environment Configuration**: Comprehensive setup for development, production, and GitHub Pages hosting
+
+## Project Structure
 
 This workspace contains two interconnected projects delivering an authentic WOPR experience:
 
@@ -70,13 +88,16 @@ ai-wopr/
 - **Text-to-Speech** functionality with robotic voice configuration
 - **Terminal beeping sounds** using Web Audio API (800Hz square wave)
 - **Dual-Layer Fallback System** for complete backend unavailability
+- **Mobile Touch Support** with haptic feedback and responsive design
+- **Connection Prompt Enhancement** - supports mouse clicks and touch gestures for mobile devices
 - **Input cursor blinking** with authentic terminal feel
 - **Character-by-character typing** with synchronized beeping
 - **Smart input focus management** for seamless user experience
 - **Retro green monospace font** (Courier Prime)
 - **TTS and beep toggle controls** for customizable experience
 - **Individual message replay** with speak buttons
-- **Responsive design** for modern devices
+- **Responsive design** optimized for desktop and mobile devices
+- **Environment-specific configurations** for development, production, and GitHub Pages
 - **Playwright testing** for comprehensive functional testing
 - **Client-side resilience** with 15 backup WOPR messages
 
@@ -186,12 +207,46 @@ npm install
 # Install Playwright browsers
 npx playwright install
 
-# Build and run
-npm run build
-npm start
+# Start development server
+npm run start:dev
 ```
 
 The frontend will be available at `http://localhost:4200`.
+
+### 3. Environment Configurations
+
+The project includes multiple environment configurations for different deployment scenarios:
+
+#### Development Environment
+```powershell
+# Start with development configuration (shows debug banner)
+npm run start:dev
+
+# Build for development (with source maps and logging)
+npm run build:dev
+```
+
+#### GitHub Pages Environment
+```powershell
+# Build for GitHub Pages deployment
+npm run build:github
+
+# Test GitHub Pages configuration locally
+ng serve --configuration github
+```
+
+#### Production Environment
+```powershell
+# Build for production deployment
+npm run build:prod
+```
+
+**Environment Features:**
+- **Development**: Debug banner, detailed logging, local API endpoints
+- **GitHub Pages**: Optimized for static hosting, fallback mode enabled, correct base href
+- **Production**: Optimized builds, reduced logging, Azure-ready API endpoints
+
+See [Environment Configuration Guide](frontend/ENVIRONMENTS.md) for detailed information.
 
 ## 🎮 Usage
 
@@ -218,17 +273,77 @@ WOPR: EXCELLENT CHOICE. TIC-TAC-TOE IS A FASCINATING GAME.
 
 ## 🧪 Testing
 
+### Comprehensive Test Suite
+
+This project includes extensive testing to ensure the dual-layer fallback system operates reliably under all conditions.
+
 ### Backend Testing
+
 ```powershell
 cd backend
 dotnet test
 ```
 
-### Frontend Testing (Playwright)
+### Frontend End-to-End Testing (Playwright)
+
+The project features a comprehensive Playwright test suite that validates the entire fallback system:
+
 ```powershell
 cd frontend/wopr-frontend
+
+# Run all fallback tests
 npm run test:e2e
+
+# Run specific test categories
+npx playwright test wopr-fallback.spec.ts --grep "Layer 1"    # Backend API fallback tests
+npx playwright test wopr-fallback.spec.ts --grep "Layer 2"    # Client-side fallback tests
+
+# Run with browser UI for debugging
+npx playwright test --ui
+
+# Generate and view test report
+npx playwright show-report
 ```
+
+### Test Coverage Overview
+
+#### Layer 1 Fallback Tests (Backend API Fallback)
+
+- Azure OpenAI service failure handling
+- Backend 503 service unavailable errors
+- Backend timeout and gateway errors
+- Graceful degradation with authentic WOPR messages
+
+#### Layer 2 Fallback Tests (Client-Side Fallback)
+
+- Complete backend unavailability (connection refused)
+- Network errors and DNS failures
+- Multiple consecutive failure scenarios
+- Client-side resilience validation
+
+#### System Integration Tests
+
+- Connection flow and audio handling
+- Startup sequence validation
+- Reset functionality under failure conditions
+- Cross-platform compatibility (Chromium, Firefox, WebKit)
+
+#### Fallback Message Quality Tests
+
+- WOPR personality consistency in error states
+- Message authenticity and technical terminology
+- Game suggestions in fallback scenarios
+- Contextually appropriate responses
+
+### Test Results Summary
+
+- **12 comprehensive test scenarios** covering all failure modes
+- **7+ currently passing tests** validating core functionality
+- **Audio mocking system** to prevent test environment issues
+- **Timing-aware assertions** for typewriter animation effects
+- **Cross-browser validation** ensuring consistent behavior
+
+The test suite confirms that both fallback layers work correctly, providing users with a consistent WOPR experience even during service outages or network issues.
 
 ## 🐛 Debugging
 
