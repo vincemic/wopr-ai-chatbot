@@ -1,0 +1,137 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build-backend",
+            "type": "shell",
+            "command": "dotnet",
+            "args": ["build"],
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}/backend"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "run-backend",
+            "type": "shell",
+            "command": "dotnet",
+            "args": ["run"],
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}/backend"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": "$msCompile",
+            "isBackground": true,
+            "runOptions": {
+                "instanceLimit": 1
+            }
+        },
+        {
+            "label": "start-frontend-dev",
+            "type": "shell",
+            "command": "npm",
+            "args": ["start"],
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}/frontend/wopr-frontend"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": ["$tsc", "$eslint-stylish"],
+            "isBackground": true,
+            "runOptions": {
+                "instanceLimit": 1
+            }
+        },
+        {
+            "label": "build-frontend",
+            "type": "shell",
+            "command": "npm",
+            "args": ["run", "build"],
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}/frontend/wopr-frontend"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": ["$tsc", "$eslint-stylish"]
+        },
+        {
+            "label": "install-frontend-deps",
+            "type": "shell",
+            "command": "npm",
+            "args": ["install"],
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}/frontend/wopr-frontend"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "test-playwright",
+            "type": "shell",
+            "command": "npm",
+            "args": ["run", "test:e2e"],
+            "group": "test",
+            "options": {
+                "cwd": "${workspaceFolder}/frontend/wopr-frontend"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "clean-backend",
+            "type": "shell",
+            "command": "dotnet",
+            "args": ["clean"],
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}/backend"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared"
+            }
+        }
+    ]
+}

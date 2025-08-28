@@ -1,0 +1,38 @@
+{
+    "files.exclude": {
+        "**/node_modules": true,
+        "**/bin": true,
+        "**/obj": true,
+        "**/.angular": true,
+        "**/dist": true,
+        "**/.vscode/chrome-debug-profile": true
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/bin": true,
+        "**/obj": true,
+        "**/.angular": true,
+        "**/dist": true
+    },
+    "typescript.preferences.importModuleSpecifier": "relative",
+    "typescript.suggest.autoImports": true,
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit"
+    },
+    "dotnet.completion.showCompletionItemsFromUnimportedNamespaces": true,
+    "omnisharp.enableAsyncCompletion": true,
+    "debug.console.fontSize": 14,
+    "debug.console.fontFamily": "Consolas, 'Courier New', monospace",
+    "debug.allowBreakpointsEverywhere": true,
+    "debug.showBreakpointsInOverviewRuler": true,
+    "csharp.debug.console": "integratedTerminal",
+    "csharp.debug.stopAtEntry": false,
+    "terminal.integrated.fontSize": 14,
+    "workbench.colorCustomizations": {
+        "terminal.background": "#001100",
+        "terminal.foreground": "#00ff41",
+        "terminalCursor.background": "#00ff41",
+        "terminalCursor.foreground": "#001100"
+    }
+}

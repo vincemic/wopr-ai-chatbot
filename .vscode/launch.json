@@ -1,0 +1,93 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "🚀 Launch Backend (.NET Core)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-backend",
+            "program": "${workspaceFolder}/backend/bin/Debug/net9.0/WoprChatbotApi.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/backend",
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "https://localhost:7000;http://localhost:5000"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            },
+            "requireExactSource": false
+        },
+        {
+            "name": "🌐 Launch Frontend (Angular Dev Server)",
+            "type": "node",
+            "request": "launch",
+            "preLaunchTask": "start-frontend-dev",
+            "program": "${workspaceFolder}/frontend/wopr-frontend/node_modules/.bin/ng",
+            "args": ["serve", "--host", "localhost", "--port", "4200"],
+            "cwd": "${workspaceFolder}/frontend/wopr-frontend",
+            "console": "integratedTerminal",
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
+            "name": "🌐 Attach to Chrome (Frontend Debug)",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:4200",
+            "webRoot": "${workspaceFolder}/frontend/wopr-frontend/src",
+            "sourceMaps": true,
+            "userDataDir": "${workspaceFolder}/.vscode/chrome-debug-profile",
+            "runtimeArgs": [
+                "--disable-web-security",
+                "--disable-features=VizDisplayCompositor"
+            ]
+        },
+        {
+            "name": "🧪 Run Playwright Tests",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/frontend/wopr-frontend/node_modules/.bin/playwright",
+            "args": ["test"],
+            "cwd": "${workspaceFolder}/frontend/wopr-frontend",
+            "console": "integratedTerminal",
+            "env": {
+                "CI": "true"
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "🚀🌐 Launch Full Stack (Backend + Frontend)",
+            "configurations": [
+                "🚀 Launch Backend (.NET Core)",
+                "🌐 Launch Frontend (Angular Dev Server)"
+            ],
+            "stopAll": true,
+            "presentation": {
+                "hidden": false,
+                "group": "WOPR",
+                "order": 1
+            }
+        },
+        {
+            "name": "🌐🔍 Debug Frontend in Chrome",
+            "configurations": [
+                "🌐 Launch Frontend (Angular Dev Server)",
+                "🌐 Attach to Chrome (Frontend Debug)"
+            ],
+            "stopAll": true,
+            "presentation": {
+                "hidden": false,
+                "group": "WOPR",
+                "order": 2
+            }
+        }
+    ]
+}

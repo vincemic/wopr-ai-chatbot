@@ -1,0 +1,106 @@
+/* WOPR CRT Terminal Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --crt-green: #00ff00;
+  --crt-green-rgb: 0, 255, 0;
+  --crt-dark-green: #008000;
+  --crt-black: #000000;
+  --crt-dark-gray: #111111;
+  --crt-amber: #ffb000;
+  --crt-amber-rgb: 255, 176, 0;
+  --crt-blue: #00bfff;
+  --crt-blue-rgb: 0, 191, 255;
+  --crt-red: #ff0000;
+  --scan-line-opacity: 0.04;
+  --flicker-opacity: 0.15;
+}
+
+body {
+  font-family: 'Courier Prime', 'Courier New', monospace;
+  background: var(--crt-black);
+  color: var(--crt-green);
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  position: relative;
+}
+
+/* CRT Screen Effects */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 0, var(--scan-line-opacity)) 2px,
+    rgba(0, 255, 0, var(--scan-line-opacity)) 4px
+  );
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Screen flicker animation removed */
+
+/* Text glow effect - static */
+.crt-text {
+  text-shadow: 
+    0 0 5px var(--crt-green),
+    0 0 10px var(--crt-green),
+    0 0 15px var(--crt-green);
+}
+
+/* Typing cursor - static */
+.typing {
+  border-right: 2px solid var(--crt-green);
+}
+
+/* WOPR specific styles */
+.wopr-title {
+  color: var(--crt-amber);
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+  margin: 20px 0;
+  text-shadow: 
+    0 0 10px var(--crt-amber),
+    0 0 20px var(--crt-amber);
+}
+
+.error-text {
+  color: var(--crt-red);
+  text-shadow: 
+    0 0 5px var(--crt-red),
+    0 0 10px var(--crt-red);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--crt-dark-gray);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--crt-dark-green);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--crt-green);
+}

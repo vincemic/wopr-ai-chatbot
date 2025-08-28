@@ -1,0 +1,148 @@
+<div class="wopr-terminal" (keydown)="onConnectionKeyPress($event)" tabindex="0">
+  
+  <!-- Connection Prompt Screen -->
+  <div class="connection-prompt" *ngIf="showConnectionPrompt">
+    <div class="prompt-container">
+      <div class="prompt-text">Connect?</div>
+      <div class="prompt-options">y/n</div>
+    </div>
+  </div>
+
+  <!-- Dial-up Connection Screen -->
+  <div class="dialup-screen" *ngIf="isDialingUp">
+    <div class="dialup-container">
+      <div class="dialup-text">ESTABLISHING CONNECTION...</div>
+      <div class="dialup-animation">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <div class="dialup-status">MODEM DIALING...</div>
+    </div>
+  </div>
+
+  <!-- Main WOPR Interface -->
+  <div class="wopr-interface" *ngIf="!showConnectionPrompt && !isDialingUp">
+  <!-- Header -->
+  <div class="terminal-header">
+    <div class="header-left">
+      <span class="wopr-title">W.O.P.R.</span>
+      <span class="subtitle">WAR OPERATION PLAN RESPONSE</span>
+    </div>
+    <div class="header-right">
+      <div class="status-indicator" [class.connected]="!isConnecting">
+        {{ isConnecting ? 'CONNECTING...' : 'ONLINE' }}
+      </div>
+      <div class="system-time">{{ currentTime | date:'yyyy-MM-dd HH:mm:ss' }}</div>
+    </div>
+  </div>
+
+  <!-- Game State Display -->
+  <div class="game-state" *ngIf="gameState && gameState.currentGame">
+    <span class="game-status">
+      CURRENT GAME: {{ gameState.currentGame }} | STATUS: {{ gameState.gameStatus }}
+    </span>
+  </div>
+
+  <!-- Chat Container -->
+  <div class="chat-container" #chatContainer>
+    <div class="message" 
+         *ngFor="let message of messages; trackBy: trackByMessage"
+         [ngClass]="getMessageClass(message.role)">
+      
+      <div class="message-content">
+        <span class="message-prefix" *ngIf="message.role === 'user'">></span>
+        <span class="message-prefix" *ngIf="message.role === 'assistant'">WOPR:</span>
+        <span class="message-prefix" *ngIf="message.role === 'system'">SYSTEM:</span>
+        
+        <span class="message-text" 
+              [class.typing]="isTyping && message === messages[messages.length - 1]">
+          {{ message.content }}
+        </span>
+        
+        <!-- Text-to-speech button for WOPR messages -->
+        <button class="speak-btn" 
+                *ngIf="message.role === 'assistant' && message.content"
+                (click)="speakMessage(message.content)"
+                title="Speak message">
+          🔊
+        </button>
+      </div>
+      
+      <div class="message-timestamp">
+        {{ message.timestamp | date:'HH:mm:ss' }}
+      </div>
+    </div>
+
+    <!-- Typing indicator -->
+    <div class="typing-indicator" *ngIf="isTyping">
+      <span class="message-prefix">WOPR:</span>
+      <span class="typing-dots">
+        <span class="dot">.</span>
+        <span class="dot">.</span>
+        <span class="dot">.</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- Input Area -->
+  <div class="input-area">
+    <div class="input-row">
+      <span class="input-prefix">></span>
+      <input type="text" 
+             #messageInput
+             class="message-input"
+             [(ngModel)]="currentMessage"
+             (keypress)="onKeyPress($event)"
+             [disabled]="isConnecting || isTyping"
+             placeholder="Enter command..."
+             autocomplete="off">
+      
+      <button class="send-button" 
+              (click)="sendMessage()"
+              [disabled]="isConnecting || isTyping || !currentMessage.trim()">
+        SEND
+      </button>
+      
+      <button class="reset-button" 
+              (click)="resetSystem()"
+              [disabled]="isConnecting"
+              title="Reset WOPR Systems">
+        RESET
+      </button>
+      
+      <button class="tts-toggle-button" 
+              (click)="toggleTextToSpeech()"
+              [class.enabled]="textToSpeechEnabled"
+              title="Toggle automatic text-to-speech">
+        {{ textToSpeechEnabled ? '🔊' : '🔇' }}
+      </button>
+      
+      <button class="beep-toggle-button" 
+              (click)="toggleBeepSound()"
+              [class.enabled]="beepEnabled"
+              title="Toggle terminal beep sounds">
+        {{ beepEnabled ? '🔔' : '🔕' }}
+      </button>
+      
+      <button class="dialup-toggle-button" 
+              (click)="toggleDialupSound()"
+              [class.enabled]="dialupEnabled"
+              title="Toggle dial-up modem sound">
+        {{ dialupEnabled ? '📞' : '📵' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div class="loading-overlay" *ngIf="isConnecting">
+    <div class="loading-text">
+      <div class="loading-line">ESTABLISHING CONNECTION TO WOPR...</div>
+      <div class="loading-line">AUTHENTICATING SECURITY PROTOCOLS...</div>
+      <div class="loading-line">INITIALIZING WAR GAMES INTERFACE...</div>
+    </div>
+  </div>
+
+  </div> <!-- End wopr-interface -->
+
+</div>

@@ -1,0 +1,15 @@
+{
+    "recommendations": [
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.vscode-dotnet-runtime",
+        "ms-dotnettools.csdevkit",
+        "angular.ng-template",
+        "ms-playwright.playwright",
+        "ms-vscode.vscode-typescript-next",
+        "esbenp.prettier-vscode",
+        "ms-vscode.azure-account",
+        "ms-azuretools.vscode-azureappservice",
+        "ms-vscode.powershell",
+        "bradlc.vscode-tailwindcss"
+    ]
+}
