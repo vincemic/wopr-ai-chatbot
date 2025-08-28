@@ -406,7 +406,7 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
 
   private async initializeWopr() {
     // Show a message about the modem connection attempt
-    this.addSystemMessage('MODEM CONNECTION ESTABLISHED...');
+    await this.addSystemMessage('MODEM CONNECTION ESTABLISHED...');
     
     // Small delay before starting initialization
     await this.delay(1000);
@@ -422,13 +422,13 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
       // Check if backend is unavailable
       if (this.isBackendUnavailableError(error)) {
         // Use WOPR fallback message instead of generic error
-        this.addSystemMessage('WARNING: WOPR AI MAINFRAME OFFLINE. CONNECTION FAILED.');
-        this.addSystemMessage('ENGAGING STANDALONE BACKUP PROTOCOLS...');
-        this.addSystemMessage('');
-        this.addSystemMessage('LOCAL GAME DATABASE ACCESSIBLE.');
-        this.addSystemMessage('SHALL WE PLAY A GAME?');
+        await this.addSystemMessage('WARNING: WOPR AI MAINFRAME OFFLINE. CONNECTION FAILED.');
+        await this.addSystemMessage('ENGAGING STANDALONE BACKUP PROTOCOLS...');
+        await this.addSystemMessage('');
+        await this.addSystemMessage('LOCAL GAME DATABASE ACCESSIBLE.');
+        await this.addSystemMessage('SHALL WE PLAY A GAME?');
       } else {
-        this.addSystemMessage('ERROR: Unable to connect to WOPR systems. Check backend configuration.');
+        await this.addSystemMessage('ERROR: Unable to connect to WOPR systems. Check backend configuration.');
       }
       this.isConnecting = false;
       // Focus input even if there's an error
@@ -515,7 +515,11 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
       
       if (response?.success) {
         await this.typeMessage(response.response);
+      } else if (response?.response) {
+        // Backend fallback mode - use the fallback message from response field
+        await this.typeMessage(response.response);
       } else {
+        // No response content available - show error
         await this.typeMessage(response?.error || 'SYSTEM ERROR: No response received');
       }
     } catch (error: any) {
@@ -541,46 +545,36 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
     }
   }
 
-  resetSystem() {
-    this.woprApi.resetGameState().subscribe({
-      next: () => {
+  async resetSystem() {
+    try {
+      await this.woprApi.resetGameState().toPromise();
+      this.messages = [];
+      this.gameState = null;
+      await this.addSystemMessage('WOPR SYSTEMS RESET. ALL GAME STATES CLEARED.');
+      await this.addSystemMessage('TYPE /HELP FOR COMMAND LIST.');
+      await this.addSystemMessage('SHALL WE PLAY A GAME?');
+      // Focus input after reset messages
+      this.focusInput();
+    } catch (error: any) {
+      // Check if backend is unavailable
+      if (this.isBackendUnavailableError(error)) {
         this.messages = [];
         this.gameState = null;
-        this.addSystemMessage('WOPR SYSTEMS RESET. ALL GAME STATES CLEARED.');
-        this.addSystemMessage('TYPE /HELP FOR COMMAND LIST.');
-        this.addSystemMessage('SHALL WE PLAY A GAME?');
-        // Focus input after reset messages
-        setTimeout(() => this.focusInput(), 2000); // Wait for messages to finish typing
-      },
-      error: (error) => {
-        // Check if backend is unavailable
-        if (this.isBackendUnavailableError(error)) {
-          this.messages = [];
-          this.gameState = null;
-          this.addSystemMessage('WOPR AI OFFLINE - LOCAL RESET INITIATED.');
-          this.addSystemMessage('BACKUP SYSTEMS CLEARED. GAME DATABASE READY.');
-          this.addSystemMessage('TYPE /HELP FOR COMMAND LIST.');
-          this.addSystemMessage('SHALL WE PLAY A GAME?');
-          setTimeout(() => this.focusInput(), 2000);
-        } else {
-          this.addSystemMessage(`RESET FAILED: ${error.message}`);
-          this.focusInput();
-        }
+        await this.addSystemMessage('WOPR AI OFFLINE - LOCAL RESET INITIATED.');
+        await this.addSystemMessage('BACKUP SYSTEMS CLEARED. GAME DATABASE READY.');
+        await this.addSystemMessage('TYPE /HELP FOR COMMAND LIST.');
+        await this.addSystemMessage('SHALL WE PLAY A GAME?');
+        this.focusInput();
+      } else {
+        await this.addSystemMessage(`RESET FAILED: ${error.message}`);
+        this.focusInput();
       }
-    });
+    }
   }
 
-  private addSystemMessage(content: string) {
-    this.messages.push({
-      role: 'system',
-      content,
-      timestamp: new Date()
-    });
-    
-    // Automatically speak system messages
-    if (content.trim()) {
-      setTimeout(() => this.speakMessage(content), 300);
-    }
+  private async addSystemMessage(content: string): Promise<void> {
+    // Use typeMessage for consistent beeping behavior
+    await this.typeMessage(content, 'system');
   }
 
   private scrollToBottom() {
@@ -622,7 +616,7 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
     this.currentTime = new Date();
   }
 
-  toggleTextToSpeech() {
+  async toggleTextToSpeech() {
     this.textToSpeechEnabled = !this.textToSpeechEnabled;
     
     if (!this.textToSpeechEnabled) {
@@ -634,13 +628,13 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
     
     // Announce the change
     const status = this.textToSpeechEnabled ? 'ENABLED' : 'DISABLED';
-    this.addSystemMessage(`VOICE SYNTHESIS ${status}`);
+    await this.addSystemMessage(`VOICE SYNTHESIS ${status}`);
     
     // Return focus to input
-    setTimeout(() => this.focusInput(), 1000);
+    this.focusInput();
   }
 
-  toggleBeepSound() {
+  async toggleBeepSound() {
     this.beepEnabled = !this.beepEnabled;
     
     // Test beep when enabling
@@ -650,33 +644,33 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
     
     // Announce the change
     const status = this.beepEnabled ? 'ENABLED' : 'DISABLED';
-    this.addSystemMessage(`TERMINAL AUDIO ${status}`);
+    await this.addSystemMessage(`TERMINAL AUDIO ${status}`);
     
     // Return focus to input
-    setTimeout(() => this.focusInput(), 1000);
+    this.focusInput();
   }
 
-  toggleDialupSound() {
+  async toggleDialupSound() {
     this.dialupEnabled = !this.dialupEnabled;
     
     // Test dial-up sound when enabling
     if (this.dialupEnabled && this.dialupAudio) {
       this.dialupAudio.play().then(() => {
         console.log('WOPR: Dial-up sound test played successfully');
-      }).catch(error => {
+      }).catch(async (error) => {
         console.warn('WOPR: Could not play dial-up sound test', error);
         // Announce that user interaction may be needed
-        this.addSystemMessage('MODEM AUDIO ENABLED - Click anywhere to activate sound');
+        await this.addSystemMessage('MODEM AUDIO ENABLED - Click anywhere to activate sound');
         return;
       });
     }
     
     // Announce the change
     const status = this.dialupEnabled ? 'ENABLED' : 'DISABLED';
-    this.addSystemMessage(`MODEM AUDIO ${status}`);
+    await this.addSystemMessage(`MODEM AUDIO ${status}`);
     
     // Return focus to input
-    setTimeout(() => this.focusInput(), 1000);
+    this.focusInput();
   }
 
   // Text-to-speech functionality
@@ -730,17 +724,17 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
       
       case '/tts':
       case '/voice':
-        this.toggleTextToSpeech();
+        await this.toggleTextToSpeech();
         break;
       
       case '/beep':
       case '/audio':
-        this.toggleBeepSound();
+        await this.toggleBeepSound();
         break;
       
       case '/dialup':
       case '/modem':
-        this.toggleDialupSound();
+        await this.toggleDialupSound();
         break;
       
       case '/test-dialup':
@@ -749,7 +743,7 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
         break;
       
       case '/reset':
-        this.resetSystem();
+        await this.resetSystem();
         break;
       
       case '/status':
