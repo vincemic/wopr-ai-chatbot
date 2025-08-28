@@ -75,9 +75,8 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Health check endpoint
-app.MapGet("/health", () => new
-{
-    status = "Healthy",
+app.MapGet("/health", () => new { 
+    status = "Healthy", 
     timestamp = DateTime.UtcNow,
     system = "WOPR Chatbot API"
 });

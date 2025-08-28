@@ -1,0 +1,84 @@
+# WOPR AI Chatbot - Complete .gitignore
+
+# Compiled output
+/backend/bin
+/backend/obj
+/frontend/wopr-frontend/dist
+/frontend/wopr-frontend/tmp
+/frontend/wopr-frontend/out-tsc
+/frontend/wopr-frontend/bazel-out
+
+# Dependencies
+/backend/packages
+/frontend/wopr-frontend/node_modules
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# User secrets and configuration
+**/user-secrets.json
+**/user-secrets
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.staging
+.env.development
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Miscellaneous
+/.angular/cache
+.sass-cache/
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# AI IDE specific directories (keep for reference but exclude from repo)
+.claude/
+.gemini/
+.cursor/
+.junie/
+.windsurf/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Build outputs
+*.dll
+*.exe
+*.pdb

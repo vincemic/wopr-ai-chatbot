@@ -4,39 +4,7 @@ A complete Visual Studio Code workspace featuring a WOPR (War Operation Plan Res
 
 ![WOPR Terminal Interface](https://img.shields.io/badge/WOPR-OPERATIONAL-green?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iTjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIgMkgyMlYyMkgyVjJaIiBzdHJva2U9IiMwMEZGMDAiIHN0cm9rZS13aWR0aD0iMiIvPgo8L3N2Zz4K)
 
-## 🚀 Live Demo
-
-**Try the WOPR chatbot online**: [GitHub Pages Demo](https://vincemic.github.io/wopr-ai-chatbot/)
-
-*The online demo runs with client-side fallback messages and includes all interactive features: connection prompt, dial-up modem sounds, CRT effects, text-to-speech, and terminal beeping.*
-
-## 📋 Technical Specifications
-
-### Backend Technology Stack
-- **.NET 9.0**: Latest LTS framework with performance optimizations
-- **Microsoft Semantic Kernel 1.64.0**: AI orchestration with Azure OpenAI connectors
-- **OpenTelemetry 1.9.0**: Distributed tracing and metrics collection
-- **Application Insights**: Azure cloud monitoring and diagnostics
-- **Serilog**: Structured logging with enrichers and correlation
-- **ASP.NET Core**: High-performance web API framework
-- **Swagger/OpenAPI**: Interactive API documentation
-
-### Frontend Technology Stack
-- **Angular 18+**: Latest framework with standalone components
-- **TypeScript**: Type-safe development with modern ES features
-- **SCSS**: Advanced styling with CSS custom properties
-- **Web Speech API**: Browser-native text-to-speech functionality
-- **Web Audio API**: Low-level audio processing for beeping sounds
-- **HttpClient**: Reactive programming with RxJS observables
-- **Playwright**: End-to-end testing framework
-
-### Development Tools
-- **VS Code Workspace**: Comprehensive debugging configuration
-- **User Secrets**: Secure local development configuration
-- **PowerShell**: Cross-platform scripting and automation
-- **npm/dotnet CLI**: Package management and build tools
-
-## 🛠️ Prerequisites
+## 🎯 Project Overview
 
 This workspace contains two interconnected projects delivering an authentic WOPR experience:
 
@@ -92,7 +60,7 @@ ai-wopr/
 - **Playwright testing** for comprehensive functional testing
 - **Client-side resilience** with 15 backup WOPR messages
 
-## � Resilience & Monitoring
+## 🔄 Resilience & Monitoring
 
 ### Dual-Layer Fallback System
 This project implements a sophisticated fallback system ensuring WOPR remains operational under all conditions:
@@ -126,6 +94,34 @@ This project implements a sophisticated fallback system ensuring WOPR remains op
 - Comprehensive error tracking with stack traces
 - Performance logging for bottleneck identification
 - Integration with Azure Application Insights for centralized logging
+
+## 📋 Technical Specifications
+
+### Backend Technology Stack
+- **.NET 9.0**: Latest LTS framework with performance optimizations
+- **Microsoft Semantic Kernel 1.64.0**: AI orchestration with Azure OpenAI connectors
+- **OpenTelemetry 1.9.0**: Distributed tracing and metrics collection
+- **Application Insights**: Azure cloud monitoring and diagnostics
+- **Serilog**: Structured logging with enrichers and correlation
+- **ASP.NET Core**: High-performance web API framework
+- **Swagger/OpenAPI**: Interactive API documentation
+
+### Frontend Technology Stack
+- **Angular 18+**: Latest framework with standalone components
+- **TypeScript**: Type-safe development with modern ES features
+- **SCSS**: Advanced styling with CSS custom properties
+- **Web Speech API**: Browser-native text-to-speech functionality
+- **Web Audio API**: Low-level audio processing for beeping sounds
+- **HttpClient**: Reactive programming with RxJS observables
+- **Playwright**: End-to-end testing framework
+
+### Development Tools
+- **VS Code Workspace**: Comprehensive debugging configuration
+- **User Secrets**: Secure local development configuration
+- **PowerShell**: Cross-platform scripting and automation
+- **npm/dotnet CLI**: Package management and build tools
+
+## 🛠️ Prerequisites
 
 - [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
 - [Node.js 18+](https://nodejs.org/)
@@ -234,21 +230,6 @@ See [DEBUG.md](DEBUG.md) for detailed debugging guide.
 
 ## 🚀 Deployment
 
-### GitHub Pages (Frontend Only - Automatic)
-
-The easiest way to deploy the WOPR frontend is using GitHub Pages with automatic deployment:
-
-1. **Enable GitHub Pages** in your repository Settings → Pages → Source: GitHub Actions
-2. **Push changes** to the `main` branch (the workflow automatically triggers on `frontend/` changes)
-3. **Access your app** at `https://[username].github.io/wopr-ai-chatbot/`
-
-The GitHub Actions workflow (`.github/workflows/deploy-frontend.yml`) automatically:
-- Builds the Angular app with proper base href for GitHub Pages
-- Includes SPA routing support and sound assets
-- Deploys to GitHub Pages on every push to `frontend/` files
-
-*The GitHub Pages version runs with client-side fallback messages since no backend is available.*
-
 ### Azure App Service (Backend)
 
 1. Create an Azure App Service
@@ -346,6 +327,6 @@ Feel free to contribute improvements, additional games, or enhanced WOPR persona
 
 ---
 
-**WOPR STATUS**: OPERATIONAL
-**DEFCON LEVEL**: 5
+**WOPR STATUS**: OPERATIONAL  
+**DEFCON LEVEL**: 5  
 **READY TO PLAY**: ✓

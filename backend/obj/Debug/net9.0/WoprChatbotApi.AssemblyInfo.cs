@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WoprChatbotApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ac589039e3c7073014d1cc2addd0a6a0bd509a23")]
 [assembly: System.Reflection.AssemblyProductAttribute("WoprChatbotApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WoprChatbotApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
