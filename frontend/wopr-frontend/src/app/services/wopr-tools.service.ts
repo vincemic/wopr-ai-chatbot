@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import {
-    DefenseScenario,
-    NoradData,
-    SystemDiagnostic,
-    WoprTool,
-    WoprToolCall,
-    WoprToolResult
+  DefenseScenario,
+  NoradData,
+  SystemDiagnostic,
+  WoprTool,
+  WoprToolCall,
+  WoprToolResult
 } from '../models/wopr-tools.models';
 import { LaunchCodeService } from './launch-code.service';
 
