@@ -1,10 +1,6 @@
 {
     "folders": [
         {
-            "name": "Backend (.NET Core)",
-            "path": "./backend"
-        },
-        {
             "name": "Frontend (Angular)",
             "path": "./frontend/wopr-frontend"
         },
@@ -16,15 +12,11 @@
     "settings": {
         "files.exclude": {
             "**/node_modules": true,
-            "**/bin": true,
-            "**/obj": true,
             "**/.angular": true,
             "**/dist": true
         },
         "search.exclude": {
             "**/node_modules": true,
-            "**/bin": true,
-            "**/obj": true,
             "**/.angular": true,
             "**/dist": true
         },
@@ -33,34 +25,30 @@
         "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
             "source.organizeImports": "explicit"
-        },
-        "dotnet.completion.showCompletionItemsFromUnimportedNamespaces": true,
-        "omnisharp.enableAsyncCompletion": true
+        }
     },
     "extensions": {
         "recommendations": [
-            "ms-dotnettools.csharp",
-            "ms-dotnettools.vscode-dotnet-runtime",
             "angular.ng-template",
             "ms-playwright.playwright",
             "ms-vscode.vscode-typescript-next",
             "esbenp.prettier-vscode",
             "bradlc.vscode-tailwindcss",
-            "ms-vscode.azure-account",
-            "ms-azuretools.vscode-azureappservice"
+            "ms-vscode.vscode-json",
+            "ms-vscode.live-server"
         ]
     },
     "tasks": {
         "version": "2.0.0",
         "tasks": [
             {
-                "label": "Build Backend",
+                "label": "Start Frontend",
                 "type": "shell",
-                "command": "dotnet",
-                "args": ["build"],
+                "command": "npm",
+                "args": ["start"],
                 "group": "build",
                 "options": {
-                    "cwd": "${workspaceFolder}/backend"
+                    "cwd": "${workspaceFolder}/frontend/wopr-frontend"
                 },
                 "presentation": {
                     "echo": true,
@@ -68,24 +56,7 @@
                     "focus": false,
                     "panel": "shared"
                 },
-                "problemMatcher": "$msCompile"
-            },
-            {
-                "label": "Run Backend",
-                "type": "shell",
-                "command": "dotnet",
-                "args": ["run"],
-                "group": "build",
-                "options": {
-                    "cwd": "${workspaceFolder}/backend"
-                },
-                "presentation": {
-                    "echo": true,
-                    "reveal": "always",
-                    "focus": false,
-                    "panel": "shared"
-                },
-                "problemMatcher": "$msCompile",
+                "problemMatcher": ["$tsc", "$eslint-stylish"],
                 "isBackground": true
             },
             {
@@ -106,10 +77,10 @@
                 "problemMatcher": ["$tsc", "$eslint-stylish"]
             },
             {
-                "label": "Start Frontend",
+                "label": "Build for Production",
                 "type": "shell",
                 "command": "npm",
-                "args": ["start"],
+                "args": ["run", "build:prod"],
                 "group": "build",
                 "options": {
                     "cwd": "${workspaceFolder}/frontend/wopr-frontend"
@@ -120,8 +91,24 @@
                     "focus": false,
                     "panel": "shared"
                 },
-                "problemMatcher": ["$tsc", "$eslint-stylish"],
-                "isBackground": true
+                "problemMatcher": ["$tsc", "$eslint-stylish"]
+            },
+            {
+                "label": "Build for GitHub Pages",
+                "type": "shell",
+                "command": "npm",
+                "args": ["run", "build:github"],
+                "group": "build",
+                "options": {
+                    "cwd": "${workspaceFolder}/frontend/wopr-frontend"
+                },
+                "presentation": {
+                    "echo": true,
+                    "reveal": "always",
+                    "focus": false,
+                    "panel": "shared"
+                },
+                "problemMatcher": ["$tsc", "$eslint-stylish"]
             },
             {
                 "label": "Run Playwright Tests",
@@ -140,13 +127,30 @@
                 }
             },
             {
-                "label": "Start Full Stack",
-                "dependsOrder": "parallel",
-                "dependsOn": [
-                    "Run Backend",
-                    "Start Frontend"
-                ],
+                "label": "Install Dependencies",
+                "type": "shell",
+                "command": "npm",
+                "args": ["install"],
                 "group": "build",
+                "options": {
+                    "cwd": "${workspaceFolder}/frontend/wopr-frontend"
+                },
+                "presentation": {
+                    "echo": true,
+                    "reveal": "always",
+                    "focus": false,
+                    "panel": "shared"
+                }
+            },
+            {
+                "label": "Install Playwright Browsers",
+                "type": "shell",
+                "command": "npx",
+                "args": ["playwright", "install"],
+                "group": "build",
+                "options": {
+                    "cwd": "${workspaceFolder}/frontend/wopr-frontend"
+                },
                 "presentation": {
                     "echo": true,
                     "reveal": "always",

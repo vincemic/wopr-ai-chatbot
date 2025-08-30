@@ -1,6 +1,15 @@
 # GitHub Pages Deployment
 
-This workflow automatically deploys the WOPR frontend to GitHub Pages when changes are pushed to the `frontend/` directory.
+This workflow automatically deploys the WOPR **frontend-only application** to GitHub Pages when changes are pushed to the `frontend/` directory.
+
+## Frontend-Only Architecture
+
+This project uses a **frontend-only architecture** with:
+
+- **Direct OpenAI Integration**: Browser-to-OpenAI API communication
+- **No Backend Required**: Complete WOPR experience runs in the browser
+- **User-Provided API Keys**: Secure localStorage-based API key management
+- **Static Hosting Friendly**: Perfect for GitHub Pages deployment
 
 ## Setup Instructions
 
@@ -32,6 +41,7 @@ https://[your-username].github.io/wopr-ai-chatbot/
 - ✅ Optimized production build with proper base href
 - ✅ Manual deployment trigger available
 - ✅ Only deploys when frontend files change
+- ✅ **No backend required** - runs entirely in the browser
 
 ## Workflow Details
 
@@ -42,10 +52,10 @@ The workflow:
 3. Configures and uploads to GitHub Pages
 4. Deploys the built application
 
-The frontend runs independently with built-in fallback messages, so no backend is required for the GitHub Pages deployment.
-
 ## Notes
 
-- The deployed version uses client-side fallback messages since no backend is available on GitHub Pages
-- All WOPR interactions work including the connection prompt, dial-up sounds, and CRT interface
-- The app is fully functional as a standalone demonstration
+- **Frontend-Only**: No backend server required - the app runs entirely in the browser
+- **OpenAI Integration**: Users provide their own OpenAI API keys for full functionality
+- **Fallback System**: Includes helpful guidance when no API key is configured
+- **Complete WOPR Experience**: All features work including connection prompt, dial-up sounds, and CRT interface
+- **Production Ready**: Fully functional as a standalone demonstration
