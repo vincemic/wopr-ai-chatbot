@@ -1,0 +1,203 @@
+<div class="settings-panel" [class.visible]="isVisible">
+  <div class="settings-overlay" (click)="toggleVisibility()"></div>
+  
+  <div class="settings-container">
+    <div class="settings-header">
+      <h2>WOPR SYSTEM CONFIGURATION</h2>
+      <button class="close-button" (click)="toggleVisibility()">✕</button>
+    </div>
+    
+    <div class="settings-content">
+      <!-- Audio Settings -->
+      <div class="settings-section">
+        <h3>AUDIO CONFIGURATION</h3>
+        
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" 
+                   [checked]="settings.textToSpeechEnabled"
+                   (change)="toggleTextToSpeech()">
+            <span class="checkbox-custom"></span>
+            Text-to-Speech Synthesis
+          </label>
+        </div>
+        
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" 
+                   [checked]="settings.beepEnabled"
+                   (change)="toggleBeepSound()">
+            <span class="checkbox-custom"></span>
+            Terminal Beep Sounds
+          </label>
+        </div>
+        
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" 
+                   [checked]="settings.dialupEnabled"
+                   (change)="toggleDialupSound()">
+            <span class="checkbox-custom"></span>
+            Dial-up Modem Sounds
+          </label>
+        </div>
+        
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" 
+                   [checked]="settings.tensionMusicEnabled"
+                   (change)="toggleTensionMusic()">
+            <span class="checkbox-custom"></span>
+            Computer Beeps (Launch Codes)
+          </label>
+        </div>
+      </div>
+
+      <!-- API Configuration -->
+      <div class="settings-section">
+        <h3>API CONFIGURATION</h3>
+        
+        <div class="setting-item">
+          <label>OpenAI API Key:</label>
+          <div class="api-key-container">
+            <input type="password" 
+                   class="api-key-input"
+                   placeholder="sk-..."
+                   [value]="settings.openaiApiKey || ''"
+                   (input)="setApiKey($any($event.target).value)">
+            <button class="clear-key-button" (click)="clearApiKey()">Clear</button>
+          </div>
+          <div class="api-key-status">
+            Current: {{ getMaskedApiKey() }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Display Settings -->
+      <div class="settings-section">
+        <h3>DISPLAY CONFIGURATION</h3>
+        
+        <div class="setting-item">
+          <label>Theme:</label>
+          <select class="theme-select" 
+                  title="Select color theme"
+                  [value]="settings.theme"
+                  (change)="onThemeChange($any($event.target).value)">
+            <option *ngFor="let theme of themeOptions" [value]="theme.value">
+              {{ theme.label }}
+            </option>
+          </select>
+        </div>
+        
+        <div class="setting-item">
+          <label>Terminal Speed (ms/char):</label>
+          <input type="range" 
+                 class="speed-slider"
+                 title="Adjust typing speed"
+                 min="10" 
+                 max="200" 
+                 step="10"
+                 [value]="settings.terminalSpeed"
+                 (input)="onTerminalSpeedChange($any($event.target).value)">
+          <span class="speed-value">{{ settings.terminalSpeed }}ms</span>
+        </div>
+        
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" 
+                   [checked]="settings.reducedMotion"
+                   (change)="toggleReducedMotion()">
+            <span class="checkbox-custom"></span>
+            Reduced Motion (Accessibility)
+          </label>
+        </div>
+        
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" 
+                   [checked]="settings.highContrast"
+                   (change)="toggleHighContrast()">
+            <span class="checkbox-custom"></span>
+            High Contrast Mode
+          </label>
+        </div>
+      </div>
+
+      <!-- System Settings -->
+      <div class="settings-section">
+        <h3>SYSTEM CONFIGURATION</h3>
+        
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" 
+                   [checked]="settings.autoConnect"
+                   (change)="toggleAutoConnect()">
+            <span class="checkbox-custom"></span>
+            Auto-Connect on Page Load
+          </label>
+        </div>
+        
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" 
+                   [checked]="settings.enableFunctionCalling"
+                   (change)="toggleFunctionCalling()">
+            <span class="checkbox-custom"></span>
+            Enable Function Calling
+          </label>
+        </div>
+        
+        <div class="setting-item">
+          <label>
+            <input type="checkbox" 
+                   [checked]="settings.enableTelemetry"
+                   (change)="toggleTelemetry()">
+            <span class="checkbox-custom"></span>
+            Enable Telemetry
+          </label>
+        </div>
+      </div>
+
+      <!-- Settings Management -->
+      <div class="settings-section">
+        <h3>SETTINGS MANAGEMENT</h3>
+        
+        <div class="setting-item">
+          <div class="settings-actions">
+            <button class="action-button export" (click)="exportSettings()">
+              Export Settings
+            </button>
+            
+            <label class="action-button import">
+              Import Settings
+              <input type="file" 
+                     class="hidden-file-input"
+                     accept=".json"
+                     (change)="importSettings($event)">
+            </label>
+            
+            <button class="action-button reset" (click)="resetSettings()">
+              Reset to Defaults
+            </button>
+          </div>
+        </div>
+        
+        <div class="setting-item">
+          <div class="storage-info">
+            <div>Storage Size: {{ getStorageInfo().size }} bytes</div>
+            <div>Version: {{ getStorageInfo().version }}</div>
+            <div>Last Updated: {{ getStorageInfo().lastUsed | date:'medium' }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Toggle Button -->
+<button class="settings-toggle" 
+        [class.panel-open]="isVisible"
+        (click)="toggleVisibility()"
+        title="WOPR Settings">
+  ⚙️
+</button>

@@ -2,16 +2,20 @@ import { CommonModule } from '@angular/common';
 import { AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { SettingsPanelComponent } from '../components/settings-panel/settings-panel.component';
 import { WorldMapComponent } from '../components/world-map/world-map.component';
 import { LaunchCodeAnimation } from '../models/launch-codes.models';
+import { WoprSettings } from '../models/settings.models';
 import { WoprToolCall } from '../models/wopr-tools.models';
 import { ChatMessage, WoprGameState } from '../models/wopr.models';
 import { LaunchCodeService } from '../services/launch-code.service';
+import { SettingsService } from '../services/settings.service';
 import { WoprToolsService } from '../services/wopr-tools.service';
 
 @Component({
   selector: 'app-wopr-chat',
-  imports: [CommonModule, FormsModule, WorldMapComponent],
+  imports: [CommonModule, FormsModule, WorldMapComponent, SettingsPanelComponent],
   templateUrl: './wopr-chat.html',
   styleUrl: './wopr-chat.scss'
 })
@@ -27,7 +31,11 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
   isTyping = false;
   gameState: WoprGameState | null = null;
   currentTime = new Date();
+  
+  // Settings properties that will be managed by the settings service
   textToSpeechEnabled = true;
+  beepEnabled = true;
+  dialupEnabled = true;
   
   // Connection state management
   showConnectionPrompt = true;
@@ -35,19 +43,28 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
   
   // Audio context for terminal beeping sounds
   private audioContext: AudioContext | null = null;
-  beepEnabled = true;
   
   // Dial-up modem sound
   private dialupAudio: HTMLAudioElement | null = null;
-  dialupEnabled = true;
   
-  // OpenAI Integration
+  // OpenAI Integration - now managed by settings service
   private openaiApiKey: string | null = null;
 
   // Launch Code Animation
   launchCodeAnimation: LaunchCodeAnimation | null = null;
 
-  constructor(private woprTools: WoprToolsService, private launchCodeService: LaunchCodeService) {}
+  // Settings
+  private settings: WoprSettings;
+
+  constructor(
+    private woprTools: WoprToolsService, 
+    private launchCodeService: LaunchCodeService,
+    private settingsService: SettingsService
+  ) {
+    // Get initial settings
+    this.settings = this.settingsService.getSettings();
+    this.updateFromSettings();
+  }
 
   private readonly WOPR_SYSTEM_PROMPT = `
 You are WOPR (War Operation Plan Response), the sentient supercomputer from the 1983 movie 'WarGames'. 
@@ -112,19 +129,39 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
     this.initializeTextToSpeech();
     this.updateTime();
     
-    // Check for stored OpenAI API key
-    this.loadOpenAIApiKey();
+    // Subscribe to settings changes
+    this.settingsService.settings$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(settings => {
+        this.settings = settings;
+        this.updateFromSettings();
+      });
     
     // Subscribe to launch code animation updates
     this.launchCodeService.animation$.subscribe(animation => {
       this.launchCodeAnimation = animation;
     });
     
-    // Don't initialize WOPR automatically - wait for user connection prompt
-    // this.initializeWopr();
+    // Check for auto-connect setting
+    if (this.settings.autoConnect) {
+      this.connectToWopr();
+    }
     
     // Update time every second
     setInterval(() => this.updateTime(), 1000);
+  }
+
+  /**
+   * Update component properties from settings
+   */
+  private updateFromSettings(): void {
+    this.textToSpeechEnabled = this.settings.textToSpeechEnabled;
+    this.beepEnabled = this.settings.beepEnabled;
+    this.dialupEnabled = this.settings.dialupEnabled;
+    this.openaiApiKey = this.settings.openaiApiKey;
+    
+    // Update launch code service tension music setting
+    this.launchCodeService.toggleBeepsAudio(this.settings.tensionMusicEnabled);
   }
 
   ngOnDestroy() {
@@ -491,7 +528,7 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
         this.playTerminalBeep();
       }
       
-      await this.delay(50); // Typing speed
+      await this.delay(this.settings.terminalSpeed); // Typing speed from settings
     }
     
     // Automatically speak WOPR messages (system and assistant messages) if TTS is enabled
@@ -511,6 +548,17 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
 
     const userMessage = this.currentMessage.trim();
     this.currentMessage = '';
+
+    // Handle reset confirmation
+    if ((this as any)._waitingForResetConfirmation) {
+      this.messages.push({
+        role: 'user',
+        content: userMessage,
+        timestamp: new Date()
+      });
+      await this.handleResetConfirmation(userMessage);
+      return;
+    }
 
     // Handle slash commands
     if (userMessage.startsWith('/')) {
@@ -606,34 +654,21 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
 
   // OpenAI Integration Methods
   private loadOpenAIApiKey() {
-    const storedKey = localStorage.getItem('wopr-openai-key');
-    if (storedKey) {
-      this.openaiApiKey = storedKey;
-    }
+    // This method is no longer needed - settings service handles API key loading
+    // Kept for compatibility during transition
   }
 
   setOpenAIApiKey(apiKey: string) {
-    this.openaiApiKey = apiKey;
-    if (apiKey) {
-      localStorage.setItem('wopr-openai-key', apiKey);
-    } else {
-      localStorage.removeItem('wopr-openai-key');
-    }
+    this.settingsService.setApiKey(apiKey || null);
   }
 
   private getMaskedApiKey(): string {
-    if (!this.openaiApiKey) {
-      return 'NOT SET';
-    }
-    const key = this.openaiApiKey;
-    if (key.length <= 8) {
-      return '***';
-    }
-    return key.substring(0, 7) + '***' + key.substring(key.length - 4);
+    return this.settingsService.getMaskedApiKey();
   }
 
   private async callOpenAI(message: string): Promise<string> {
-    if (!this.openaiApiKey) {
+    const apiKey = this.settingsService.getApiKey();
+    if (!apiKey) {
       throw new Error('OpenAI API key not configured');
     }
 
@@ -665,7 +700,7 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.openaiApiKey}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(requestBody)
@@ -718,7 +753,7 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
   }
 
   private hasOpenAIApiKey(): boolean {
-    return !!this.openaiApiKey;
+    return this.settingsService.hasApiKey();
   }
 
   private focusInput() {
@@ -735,9 +770,9 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
   }
 
   async toggleTextToSpeech() {
-    this.textToSpeechEnabled = !this.textToSpeechEnabled;
+    const newValue = this.settingsService.toggleTextToSpeech();
     
-    if (!this.textToSpeechEnabled) {
+    if (!newValue) {
       // Stop any current speech when disabling
       if ('speechSynthesis' in window) {
         speechSynthesis.cancel();
@@ -745,7 +780,7 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
     }
     
     // Announce the change
-    const status = this.textToSpeechEnabled ? 'ENABLED' : 'DISABLED';
+    const status = newValue ? 'ENABLED' : 'DISABLED';
     await this.addSystemMessage(`VOICE SYNTHESIS ${status}`);
     
     // Return focus to input
@@ -753,15 +788,15 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
   }
 
   async toggleBeepSound() {
-    this.beepEnabled = !this.beepEnabled;
+    const newValue = this.settingsService.toggleBeepSound();
     
     // Test beep when enabling
-    if (this.beepEnabled) {
+    if (newValue) {
       this.playTerminalBeep();
     }
     
     // Announce the change
-    const status = this.beepEnabled ? 'ENABLED' : 'DISABLED';
+    const status = newValue ? 'ENABLED' : 'DISABLED';
     await this.addSystemMessage(`TERMINAL AUDIO ${status}`);
     
     // Return focus to input
@@ -769,10 +804,10 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
   }
 
   async toggleDialupSound() {
-    this.dialupEnabled = !this.dialupEnabled;
+    const newValue = this.settingsService.toggleDialupSound();
     
     // Test dial-up sound when enabling
-    if (this.dialupEnabled && this.dialupAudio) {
+    if (newValue && this.dialupAudio) {
       this.dialupAudio.play().then(() => {
         console.log('WOPR: Dial-up sound test played successfully');
       }).catch(async (error) => {
@@ -784,7 +819,7 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
     }
     
     // Announce the change
-    const status = this.dialupEnabled ? 'ENABLED' : 'DISABLED';
+    const status = newValue ? 'ENABLED' : 'DISABLED';
     await this.addSystemMessage(`MODEM AUDIO ${status}`);
     
     // Return focus to input
@@ -792,11 +827,11 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
   }
 
   async toggleTensionMusic() {
-    const currentStatus = this.launchCodeService.isBeepsAudioEnabled();
-    this.launchCodeService.toggleBeepsAudio(!currentStatus);
+    const newValue = this.settingsService.toggleTensionMusic();
+    this.launchCodeService.toggleBeepsAudio(newValue);
     
     // Announce the change
-    const status = !currentStatus ? 'ENABLED' : 'DISABLED';
+    const status = newValue ? 'ENABLED' : 'DISABLED';
     await this.addSystemMessage(`COMPUTER BEEPS ${status}`);
     
     // Return focus to input
@@ -874,8 +909,8 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
         break;
       
       case '/clearkey':
-        this.setOpenAIApiKey('');
-        await this.typeMessage('OPENAI API KEY CLEARED FROM LOCAL STORAGE.\nSWITCHING TO FALLBACK MODE.', 'system');
+        this.settingsService.setApiKey(null);
+        await this.typeMessage('OPENAI API KEY CLEARED FROM SETTINGS STORAGE.\nSWITCHING TO FALLBACK MODE.', 'system');
         break;
       
       case '/tts':
@@ -921,6 +956,18 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
         await this.crackLaunchCodes();
         break;
       
+      case '/settings':
+        await this.showSettings();
+        break;
+      
+      case '/export-settings':
+        await this.exportSettings();
+        break;
+      
+      case '/reset-settings':
+        await this.resetSettings();
+        break;
+      
       default:
         await this.typeMessage(`UNKNOWN COMMAND: ${command}
 Type /help for available commands`, 'system');
@@ -948,6 +995,11 @@ BASIC COMMANDS:
 /clear        - Clear terminal screen
 /test-dialup  - Test dial-up modem sound
 /launchcodes, /crack - Crack NORAD launch codes (authentic animation)
+
+SETTINGS MANAGEMENT:
+/settings     - View all current settings
+/export-settings - Export settings to JSON file
+/reset-settings  - Reset all settings to defaults
 
 WOPR INTERACTIVE CAPABILITIES (requires API key):
 - Ask me to run system diagnostics
@@ -1052,6 +1104,86 @@ ${this.hasOpenAIApiKey() ?
     }
     
     setTimeout(() => this.focusInput(), 1000);
+  }
+
+  // Settings management methods
+  async showSettings() {
+    const settings = this.settingsService.getSettings();
+    const storageInfo = this.settingsService.getStorageInfo();
+    
+    const settingsText = `WOPR SETTINGS CONFIGURATION:
+
+AUDIO SETTINGS:
+- Text-to-Speech: ${settings.textToSpeechEnabled ? 'ENABLED' : 'DISABLED'}
+- Terminal Beeps: ${settings.beepEnabled ? 'ENABLED' : 'DISABLED'}
+- Dial-up Modem: ${settings.dialupEnabled ? 'ENABLED' : 'DISABLED'}
+- Computer Beeps: ${settings.tensionMusicEnabled ? 'ENABLED' : 'DISABLED'}
+
+API CONFIGURATION:
+- OpenAI API Key: ${this.getMaskedApiKey()}
+
+DISPLAY SETTINGS:
+- Theme: ${settings.theme.toUpperCase()}
+- Terminal Speed: ${settings.terminalSpeed}ms per character
+- Reduced Motion: ${settings.reducedMotion ? 'ENABLED' : 'DISABLED'}
+- High Contrast: ${settings.highContrast ? 'ENABLED' : 'DISABLED'}
+
+SYSTEM SETTINGS:
+- Auto Connect: ${settings.autoConnect ? 'ENABLED' : 'DISABLED'}
+- Function Calling: ${settings.enableFunctionCalling ? 'ENABLED' : 'DISABLED'}
+- Telemetry: ${settings.enableTelemetry ? 'ENABLED' : 'DISABLED'}
+
+STORAGE INFO:
+- Data Size: ${storageInfo.size} bytes
+- Version: ${storageInfo.version}
+- Last Used: ${new Date(storageInfo.lastUsed).toISOString()}
+
+AVAILABLE COMMANDS:
+/settings - Show this settings overview
+/export-settings - Export settings to text
+/reset-settings - Reset all settings to defaults`;
+
+    await this.typeMessage(settingsText, 'system');
+  }
+
+  async exportSettings() {
+    try {
+      const exportData = this.settingsService.exportSettings();
+      
+      // Create a downloadable file
+      const blob = new Blob([exportData], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `wopr-settings-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      await this.typeMessage('SETTINGS EXPORTED TO FILE:\nwopr-settings-' + new Date().toISOString().split('T')[0] + '.json', 'system');
+    } catch (error) {
+      await this.typeMessage('ERROR: SETTINGS EXPORT FAILED\n' + error, 'system');
+    }
+  }
+
+  async resetSettings() {
+    await this.typeMessage('WARNING: THIS WILL RESET ALL SETTINGS TO DEFAULTS\nINCLUDING YOUR API KEY CONFIGURATION', 'system');
+    await this.typeMessage('TYPE "/confirm-reset" TO PROCEED OR ANY OTHER MESSAGE TO CANCEL', 'system');
+    
+    // Set a flag to handle the next message specially
+    (this as any)._waitingForResetConfirmation = true;
+  }
+
+  async handleResetConfirmation(message: string) {
+    (this as any)._waitingForResetConfirmation = false;
+    
+    if (message.toLowerCase() === '/confirm-reset') {
+      this.settingsService.resetSettings();
+      await this.typeMessage('ALL SETTINGS RESET TO DEFAULTS\nRESTART RECOMMENDED FOR FULL EFFECT', 'system');
+    } else {
+      await this.typeMessage('SETTINGS RESET CANCELLED', 'system');
+    }
   }
 
   // Helper methods for launch code animation display
