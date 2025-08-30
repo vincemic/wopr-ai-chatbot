@@ -9,16 +9,27 @@ Place your audio files in this directory:
   - Format: WAV, MP3, or OGG
   - Volume will be automatically set to 60%
 
+- **computer-beeps.wav** - Computer beeping sounds for launch code cracking sequence
+  - Recommended duration: 3-10 seconds (will loop automatically)
+  - Format: WAV, MP3, or OGG
+  - Volume will be automatically set to 30%
+  - Suggested audio: Authentic 1980s computer beeping sounds
+
 ## Notes
 
-- The dial-up sound will play automatically when the WOPR interface initializes
-- Users can toggle the dial-up sound on/off using the phone button (📞/📵)
-- For best effect, use authentic dial-up modem sounds from the 1980s era
-- The sound adds to the authentic War Games computer experience
+- The dial-up sound plays automatically when the WOPR interface initializes
+- The computer beeps play during the `/launchcodes` or `/crack` command sequence
+- Users can toggle audio on/off using the `/tension` or `/music` commands
+- Both audio files add to the authentic War Games computer experience
+- Computer beeps will loop continuously during the 30-second launch code sequence
 
 ## File Naming
 
-Make sure your dial-up modem sound file is named exactly: `dialup.wav`
+Make sure your audio files are named exactly:
 
-If you use a different format, update the filename in the component:
-`frontend/wopr-frontend/src/app/wopr-chat/wopr-chat.ts` line ~108
+- `dialup.wav` - for the dial-up modem sound
+- `computer-beeps.wav` - for the launch code computer beeps
+
+If you use different formats, update the filenames in the component:
+- Dialup: `frontend/wopr-frontend/src/app/wopr-chat/wopr-chat.ts`
+- Computer beeps: `frontend/wopr-frontend/src/app/services/launch-code.service.ts`

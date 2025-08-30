@@ -779,6 +779,18 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
     this.focusInput();
   }
 
+  async toggleTensionMusic() {
+    const currentStatus = this.launchCodeService.isBeepsAudioEnabled();
+    this.launchCodeService.toggleBeepsAudio(!currentStatus);
+    
+    // Announce the change
+    const status = !currentStatus ? 'ENABLED' : 'DISABLED';
+    await this.addSystemMessage(`COMPUTER BEEPS ${status}`);
+    
+    // Return focus to input
+    this.focusInput();
+  }
+
   // Text-to-speech functionality
   speakMessage(text: string) {
     if (!this.textToSpeechEnabled || !('speechSynthesis' in window) || !text.trim()) {
@@ -868,6 +880,11 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
       case '/modem':
         await this.toggleDialupSound();
         break;
+
+      case '/tension':
+      case '/music':
+        await this.toggleTensionMusic();
+        break;
       
       case '/test-dialup':
         await this.typeMessage('TESTING DIAL-UP MODEM SOUND...', 'system');
@@ -913,6 +930,7 @@ BASIC COMMANDS:
 /tts, /voice  - Toggle text-to-speech synthesis
 /beep, /audio - Toggle terminal beep sounds  
 /dialup, /modem - Toggle dial-up modem sounds
+/tension, /music - Toggle launch code computer beeps
 /status       - Show current system status
 /reset        - Reset WOPR systems
 /clear        - Clear terminal screen
@@ -979,6 +997,7 @@ FUNCTION CALLS: ${functionsAvailable > 0 ? `${functionsAvailable} TOOLS AVAILABL
 VOICE SYNTHESIS: ${this.textToSpeechEnabled ? 'ENABLED' : 'DISABLED'}
 TERMINAL AUDIO: ${this.beepEnabled ? 'ENABLED' : 'DISABLED'}
 MODEM AUDIO: ${this.dialupEnabled ? 'ENABLED' : 'DISABLED'}
+COMPUTER BEEPS: ${this.launchCodeService.isBeepsAudioEnabled() ? 'ENABLED' : 'DISABLED'}
 CURRENT GAME: ${this.gameState?.currentGame || 'NONE'}
 ACTIVE SESSIONS: 1
 SYSTEM TIME: ${new Date().toISOString()}

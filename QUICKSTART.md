@@ -64,6 +64,8 @@ See [DEBUG.md](DEBUG.md) for complete debugging guide.
 > Hello WOPR
 > /help
 > /apikey sk-your-key-here
+> /launchcodes
+> /tension
 > Shall we play a game?
 > What games can you play?
 > Let's play tic-tac-toe

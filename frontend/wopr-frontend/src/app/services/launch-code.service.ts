@@ -16,6 +16,10 @@ export class LaunchCodeService {
 
   public animation$ = this.animationSubject.asObservable();
 
+  // Audio management for launch code computer beeps
+  private beepsAudio: HTMLAudioElement | null = null;
+  private audioEnabled: boolean = true;
+
   // Common launch code patterns from the movie and era
   private codePatterns = [
     'CPE1704TKS', // The actual code from the movie
@@ -39,6 +43,58 @@ export class LaunchCodeService {
     'EIGHT',
     'NINE'
   ];
+
+  constructor() {
+    this.initializeBeepsAudio();
+  }
+
+  private initializeBeepsAudio() {
+    try {
+      this.beepsAudio = new Audio('assets/sounds/computer-beeps.wav');
+      this.beepsAudio.loop = true; // Loop for continuous beeping
+      this.beepsAudio.volume = 0.3; // Lower volume to not overpower typing
+      this.beepsAudio.preload = 'auto';
+      
+      console.log('WOPR: Launch code computer beeps initialized');
+    } catch (error) {
+      console.warn('WOPR: Failed to initialize launch code computer beeps', error);
+      this.audioEnabled = false;
+    }
+  }
+
+  public toggleBeepsAudio(enabled: boolean) {
+    this.audioEnabled = enabled;
+    if (!enabled && this.beepsAudio) {
+      this.beepsAudio.pause();
+      this.beepsAudio.currentTime = 0;
+    }
+  }
+
+  public isBeepsAudioEnabled(): boolean {
+    return this.audioEnabled;
+  }
+
+  private async playComputerBeeps(): Promise<void> {
+    if (!this.audioEnabled || !this.beepsAudio) {
+      return;
+    }
+
+    try {
+      this.beepsAudio.currentTime = 0;
+      await this.beepsAudio.play();
+      console.log('WOPR: Launch code computer beeps started');
+    } catch (error) {
+      console.warn('WOPR: Failed to play computer beeps', error);
+    }
+  }
+
+  private stopComputerBeeps(): void {
+    if (this.beepsAudio) {
+      this.beepsAudio.pause();
+      this.beepsAudio.currentTime = 0;
+      console.log('WOPR: Launch code computer beeps stopped');
+    }
+  }
 
   private alphabetCodes = [
     'ALPHA', 'BRAVO', 'CHARLIE', 'DELTA', 'ECHO', 'FOXTROT', 
@@ -72,6 +128,9 @@ export class LaunchCodeService {
     };
 
     this.animationSubject.next(animation);
+
+    // Start computer beeps
+    await this.playComputerBeeps();
 
     return new Promise((resolve) => {
       const interval = setInterval(() => {
@@ -123,6 +182,9 @@ export class LaunchCodeService {
           
           this.animationSubject.next({ ...current });
 
+          // Stop computer beeps on success
+          this.stopComputerBeeps();
+
           const result: LaunchCodeResult = {
             success: true,
             finalCode,
@@ -140,6 +202,10 @@ export class LaunchCodeService {
       setTimeout(() => {
         if (this.animationSubject.value.isRunning) {
           this.stopAnimation();
+          
+          // Stop computer beeps on timeout
+          this.stopComputerBeeps();
+          
           resolve({
             success: false,
             totalAttempts: this.animationSubject.value.currentAttempt,
@@ -157,6 +223,9 @@ export class LaunchCodeService {
     if (current.isRunning) {
       current.isRunning = false;
       this.animationSubject.next({ ...current });
+      
+      // Stop computer beeps when animation is manually stopped
+      this.stopComputerBeeps();
     }
   }
 

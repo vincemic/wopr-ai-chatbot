@@ -18,10 +18,11 @@ This workspace contains a **frontend-only application**:
 - Authentic CRT/dot-matrix styling with phosphor glow effects
 - Text-to-speech capabilities with robotic voice
 - Web Audio API for terminal beeping and dial-up sounds
+- Launch code computer beeps with authentic 1980s computer sounds
 - Direct OpenAI Chat API integration with gpt-4o-mini model
 - Intelligent fallback system for when no API key is configured
 - Mobile touch support with haptic feedback
-- Slash command interface (/help, /apikey, /tts, /beep, /dialup, /reset)
+- Slash command interface (/help, /apikey, /tts, /beep, /dialup, /tension, /reset)
 
 ## Development Guidelines
 - Keep WOPR character authentic to the 1983 War Games movie
@@ -44,6 +45,8 @@ This workspace contains a **frontend-only application**:
 - [x] Add mobile touch support
 - [x] Implement slash command interface
 - [x] Complete GitHub Pages deployment
+- [x] Add launch code computer beeps audio enhancement
+- [x] Implement function calling system with WOPR tools
 - [x] Ensure documentation is complete
 - [x] Remove backend dependencies (migrated to frontend-only)
 ```

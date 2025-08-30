@@ -1,7 +1,7 @@
 # WOPR AI Chatbot - War Games 1983 Emulation
 
 > **🤖 AI-Generated Project**: This entire codebase, including comprehensive frontend application, OpenAI integration, test suites, documentation, and deployment configurations, was designed and implemented by **Claude 3.5 Sonnet** (Anthropic's AI assistant). The project demonstrates advanced AI-driven software development capabilities, including frontend-only architecture with direct OpenAI integration, testing automation, CI/CD pipeline setup, and technical documentation creation. Every line of code, from the direct OpenAI Chat API integration to the Angular frontend with authentic CRT styling and Playwright end-to-end tests, represents AI-generated software engineering.
-> **🧪 AI-Driven Testing Excellence**: The project features a comprehensive Playwright test suite with 16 passing tests across multiple browsers, complete audio mocking for Web Speech API and Audio constructor handling, sophisticated element state management, and OpenAI integration testing. The tests validate slash command functionality (`/help`, `/tts`, `/beep`, `/dialup`, `/reset`, `/apikey`) after removing UI toggle buttons in favor of terminal-style commands, ensuring authentic 1983 computer experience. All test scenarios, mocking strategies, and assertion patterns were designed and implemented by AI.
+> **🧪 AI-Driven Testing Excellence**: The project features a comprehensive Playwright test suite with 16 passing tests across multiple browsers, complete audio mocking for Web Speech API and Audio constructor handling, sophisticated element state management, and OpenAI integration testing. The tests validate slash command functionality (`/help`, `/tts`, `/beep`, `/dialup`, `/tension`, `/reset`, `/apikey`) after removing UI toggle buttons in favor of terminal-style commands, ensuring authentic 1983 computer experience. All test scenarios, mocking strategies, and assertion patterns were designed and implemented by AI.
 
 A complete Visual Studio Code workspace featuring a WOPR (War Operation Plan Response) computer emulation from the 1983 movie "WarGames". This project uses a **frontend-only architecture** with direct OpenAI API integration, featuring an Angular application with authentic CRT terminal styling, text-to-speech, user-provided API key management, and comprehensive fallback systems.
 
@@ -30,9 +30,10 @@ Experience the authentic 1983 War Games WOPR computer interface directly in your
 
 ### Slash Command Interface
 
-- **Terminal-Style Commands**: Replaced UI toggle buttons with `/help`, `/tts`, `/beep`, `/dialup`, `/status`, `/reset`, `/apikey` commands
+- **Terminal-Style Commands**: Replaced UI toggle buttons with `/help`, `/tts`, `/beep`, `/dialup`, `/tension`, `/status`, `/reset`, `/apikey` commands
 - **Authentic Terminal Experience**: Command-driven interface matching 1983 computer systems
 - **Comprehensive Help System**: `/help` command provides complete usage instructions
+- **Audio Control Commands**: `/tension` and `/music` commands control launch code computer beeps
 - **Command Validation**: Smart error handling for unknown or malformed commands
 
 ### Mobile Touch Support
@@ -83,11 +84,12 @@ ai-wopr/
 
 - **Direct OpenAI Chat API Integration** with gpt-4o-mini model and full WOPR personality
 - **User-Provided API Key Management** with secure browser storage and setup instructions
-- **Comprehensive Slash Command System** (`/help`, `/apikey`, `/status`, `/tts`, `/beep`, `/dialup`, `/reset`)
+- **Comprehensive Slash Command System** (`/help`, `/apikey`, `/status`, `/tts`, `/beep`, `/dialup`, `/tension`, `/reset`)
 - **Authentic CRT terminal styling** with phosphor glow, scan lines, and dot-matrix effects
 - **Real-time chat interface** with WOPR computer personality and character-by-character typing
 - **Text-to-Speech** functionality with robotic voice configuration
 - **Terminal beeping sounds** using Web Audio API (800Hz square wave)
+- **Launch Code Computer Beeps** with authentic 1980s computer sounds during cracking sequences
 - **Intelligent Fallback System** with helpful guidance when no API key is configured
 - **Mobile Touch Support** with haptic feedback and responsive design
 - **Connection Prompt Enhancement** - supports mouse clicks and touch gestures for mobile devices
@@ -276,9 +278,10 @@ npx playwright show-report
 
 #### Slash Command Tests
 
-- Complete validation of all slash commands (`/help`, `/apikey`, `/tts`, `/beep`, `/dialup`, `/reset`)
+- Complete validation of all slash commands (`/help`, `/apikey`, `/tts`, `/beep`, `/dialup`, `/tension`, `/reset`)
 - Command parsing and error handling
 - Help system functionality
+- Audio control functionality (including computer beeps)
 - Status reporting accuracy
 
 #### System Integration Tests
@@ -372,6 +375,15 @@ The WOPR interface delivers an authentic 1983 computer experience through sophis
 - **AudioContext management** with proper cleanup and browser compatibility
 - **Toggle controls** for enabling/disabling beep sounds
 - **Volume-optimized** for non-intrusive background ambiance
+
+### Launch Code Computer Beeps
+
+- **Authentic computer beeping sounds** during launch code cracking sequences
+- **Continuous looping audio** throughout the 30-second animation
+- **Volume-optimized at 30%** to complement other interface sounds
+- **Toggle controls** via `/tension` or `/music` commands
+- **Automatic synchronization** with launch code animation start/stop
+- **Era-appropriate audio** matching 1980s computer systems
 
 ## 🐛 Troubleshooting
 
