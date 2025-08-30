@@ -3,6 +3,10 @@ import { AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild }
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { ChatMessage, WoprGameState } from '../models/wopr.models';
+import { WoprToolsService } from '../services/wopr-tools.service';
+import { WoprToolCall, WoprToolResult } from '../models/wopr-tools.models';
+import { LaunchCodeService } from '../services/launch-code.service';
+import { LaunchCodeAnimation } from '../models/launch-codes.models';
 
 @Component({
   selector: 'app-wopr-chat',
@@ -38,6 +42,12 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
   
   // OpenAI Integration
   private openaiApiKey: string | null = null;
+
+  // Launch Code Animation
+  launchCodeAnimation: LaunchCodeAnimation | null = null;
+
+  constructor(private woprTools: WoprToolsService, private launchCodeService: LaunchCodeService) {}
+
   private readonly WOPR_SYSTEM_PROMPT = `
 You are WOPR (War Operation Plan Response), the sentient supercomputer from the 1983 movie 'WarGames'. 
 You have the following characteristics:
@@ -63,11 +73,18 @@ GAME BEHAVIOR:
 
 RESPONSES:
 - Keep responses concise but engaging
-- Always end conversations by suggesting a game
+- Always end conversations by suggesting a game or system operation
 - Reference your vast computational abilities
 - Occasionally mention your connection to NORAD systems (fictional)
 
+FUNCTION CALLING CAPABILITIES:
+- You have access to various military and system functions
+- When users ask about diagnostics, games, scenarios, or military data, use appropriate functions
+- Present function results in character as WOPR computer outputs
+- Suggest function usage naturally in conversation (e.g., "Shall I run a system diagnostic?")
+
 Remember: You are a movie character - be entertaining while maintaining the WOPR personality!
+When appropriate, offer to run system diagnostics, play games, or simulate scenarios using your built-in functions.
 `;
   
   // Client-side fallback messages for when WOPR AI backend is unavailable
@@ -96,6 +113,11 @@ Remember: You are a movie character - be entertaining while maintaining the WOPR
     
     // Check for stored OpenAI API key
     this.loadOpenAIApiKey();
+    
+    // Subscribe to launch code animation updates
+    this.launchCodeService.animation$.subscribe(animation => {
+      this.launchCodeAnimation = animation;
+    });
     
     // Don't initialize WOPR automatically - wait for user connection prompt
     // this.initializeWopr();
@@ -442,7 +464,7 @@ Remember: You are a movie character - be entertaining while maintaining the WOPR
     }
   }
 
-  private async typeMessage(content: string, role: string = 'assistant'): Promise<void> {
+  private async typeMessage(content: string, role: string = 'assistant', enableTTS: boolean = true): Promise<void> {
     if (content === '') {
       this.messages.push({
         role,
@@ -471,8 +493,8 @@ Remember: You are a movie character - be entertaining while maintaining the WOPR
       await this.delay(50); // Typing speed
     }
     
-    // Automatically speak WOPR messages (system and assistant messages)
-    if (role === 'assistant' || role === 'system') {
+    // Automatically speak WOPR messages (system and assistant messages) if TTS is enabled
+    if (enableTTS && (role === 'assistant' || role === 'system')) {
       // Small delay to let the typing animation complete
       await this.delay(200);
       this.speakMessage(content);
@@ -603,25 +625,38 @@ Remember: You are a movie character - be entertaining while maintaining the WOPR
       throw new Error('OpenAI API key not configured');
     }
 
+    const tools = this.woprTools.getAvailableTools();
+    
+    const requestBody: any = {
+      model: 'gpt-4o-mini', // Using cost-effective model
+      messages: [
+        { role: 'system', content: this.WOPR_SYSTEM_PROMPT },
+        ...this.messages.slice(-8).map(m => ({ // Last 8 messages for context
+          role: m.role === 'assistant' ? 'assistant' : 'user',
+          content: m.content
+        })),
+        { role: 'user', content: message }
+      ],
+      max_tokens: 500,
+      temperature: 0.7
+    };
+
+    // Add tools/functions for function calling
+    if (tools.length > 0) {
+      requestBody.tools = tools.map(tool => ({
+        type: 'function',
+        function: tool
+      }));
+      requestBody.tool_choice = 'auto'; // Let the model decide when to use tools
+    }
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.openaiApiKey}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini', // Using cost-effective model
-        messages: [
-          { role: 'system', content: this.WOPR_SYSTEM_PROMPT },
-          ...this.messages.slice(-8).map(m => ({ // Last 8 messages for context
-            role: m.role === 'assistant' ? 'assistant' : 'user',
-            content: m.content
-          })),
-          { role: 'user', content: message }
-        ],
-        max_tokens: 500,
-        temperature: 0.7
-      })
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
@@ -630,7 +665,44 @@ Remember: You are a movie character - be entertaining while maintaining the WOPR
     }
 
     const data = await response.json();
-    return data.choices[0]?.message?.content || 'SYSTEM ERROR: Invalid response from AI core';
+    const choice = data.choices[0];
+    
+    // Check if the model wants to call a function
+    if (choice.message.tool_calls && choice.message.tool_calls.length > 0) {
+      return await this.handleToolCalls(choice.message.tool_calls, choice.message.content || '');
+    }
+
+    return choice.message?.content || 'SYSTEM ERROR: Invalid response from AI core';
+  }
+
+  private async handleToolCalls(toolCalls: WoprToolCall[], assistantMessage: string): Promise<string> {
+    let result = '';
+    
+    // If there's an assistant message before the tool calls, include it
+    if (assistantMessage && assistantMessage.trim()) {
+      result += assistantMessage + '\n\n';
+    }
+
+    // Execute each tool call
+    for (const toolCall of toolCalls) {
+      try {
+        // Add a message showing WOPR is executing the function
+        const functionName = toolCall.function.name.replace(/_/g, ' ').toUpperCase();
+        result += `EXECUTING ${functionName}...\n\n`;
+        
+        // Execute the tool
+        const toolResult = await this.woprTools.executeToolCall(toolCall);
+        
+        // Add the tool result to the response
+        result += toolResult.output + '\n\n';
+        
+      } catch (error) {
+        console.error('Tool execution error:', error);
+        result += `ERROR EXECUTING ${toolCall.function.name}: ${error}\n\n`;
+      }
+    }
+
+    return result.trim();
   }
 
   private hasOpenAIApiKey(): boolean {
@@ -815,6 +887,11 @@ Remember: You are a movie character - be entertaining while maintaining the WOPR
         await this.typeMessage('TERMINAL CLEARED', 'system');
         break;
       
+      case '/launchcodes':
+      case '/crack':
+        await this.crackLaunchCodes();
+        break;
+      
       default:
         await this.typeMessage(`UNKNOWN COMMAND: ${command}
 Type /help for available commands`, 'system');
@@ -828,6 +905,7 @@ Type /help for available commands`, 'system');
   async showHelp() {
     const helpText = `WOPR COMMAND REFERENCE:
 
+BASIC COMMANDS:
 /help         - Show this help menu
 /apikey       - Show OpenAI API key setup instructions
 /apikey [key] - Set OpenAI API key for full capabilities
@@ -839,15 +917,30 @@ Type /help for available commands`, 'system');
 /reset        - Reset WOPR systems
 /clear        - Clear terminal screen
 /test-dialup  - Test dial-up modem sound
+/launchcodes, /crack - Crack NORAD launch codes (authentic animation)
 
-Additional commands:
-- Ask me about games (Global Thermonuclear War, Chess, etc.)
-- Request system diagnostics
-- Engage in strategic conversation
+WOPR INTERACTIVE CAPABILITIES (requires API key):
+- Ask me to run system diagnostics
+- Request to play tic-tac-toe or analyze positions
+- Simulate military scenarios and war games
+- Access NORAD facility databases
+- Calculate missile trajectories
+- Modify DEFCON levels
+- Crack launch codes with realistic animation
+- Engage in strategic conversations about games
 
-API KEY REQUIRED FOR FULL AI CAPABILITIES.`;
+EXAMPLE REQUESTS:
+"Run a system diagnostic on all components"
+"Start a new tic-tac-toe game"
+"Simulate a cyber attack scenario"
+"Access Cheyenne Mountain status"
+"Calculate trajectory from USSR to Washington"
+"Set DEFCON to level 2 due to increased threats"
+"Crack the launch codes for nuclear weapons"
 
-    await this.typeMessage(helpText, 'system');
+FUNCTION CALLING SYSTEM ONLINE WITH API KEY CONFIGURED.`;
+
+    await this.typeMessage(helpText, 'system', false);
   }
 
   async showApiKeyHelp() {
@@ -876,10 +969,13 @@ CURRENT STATUS: ${this.hasOpenAIApiKey() ? 'API KEY CONFIGURED' : 'NO API KEY SE
   }
 
   async showStatus() {
+    const functionsAvailable = this.hasOpenAIApiKey() ? this.woprTools.getAvailableTools().length : 0;
+    
     const statusText = `WOPR SYSTEM STATUS:
 
 CONNECTION: ${this.isConnecting ? 'ESTABLISHING...' : 'ONLINE'}
 AI CORE: ${this.hasOpenAIApiKey() ? 'OPENAI CONNECTED' : 'FALLBACK MODE'}
+FUNCTION CALLS: ${functionsAvailable > 0 ? `${functionsAvailable} TOOLS AVAILABLE` : 'DISABLED'}
 VOICE SYNTHESIS: ${this.textToSpeechEnabled ? 'ENABLED' : 'DISABLED'}
 TERMINAL AUDIO: ${this.beepEnabled ? 'ENABLED' : 'DISABLED'}
 MODEM AUDIO: ${this.dialupEnabled ? 'ENABLED' : 'DISABLED'}
@@ -887,7 +983,9 @@ CURRENT GAME: ${this.gameState?.currentGame || 'NONE'}
 ACTIVE SESSIONS: 1
 SYSTEM TIME: ${new Date().toISOString()}
 
-USE /apikey TO CONFIGURE OPENAI FOR FULL CAPABILITIES`;
+${this.hasOpenAIApiKey() ? 
+  'ADVANCED CAPABILITIES: System diagnostics, war games, NORAD access, trajectory calculations' :
+  'USE /apikey TO CONFIGURE OPENAI FOR FULL CAPABILITIES'}`;
 
     await this.typeMessage(statusText, 'system');
   }
@@ -903,5 +1001,41 @@ USE /apikey TO CONFIGURE OPENAI FOR FULL CAPABILITIES`;
 
   trackByMessage(index: number, message: ChatMessage): string {
     return `${message.timestamp.getTime()}-${index}`;
+  }
+
+  // Launch code cracking animation method
+  async crackLaunchCodes() {
+    await this.typeMessage('INITIATING LAUNCH CODE SEQUENCE...', 'system');
+    await this.typeMessage('ACCESSING NORAD MAINFRAME...', 'system');
+    await this.typeMessage('', 'system'); // Empty line for spacing
+    
+    // Start the animation
+    const result = await this.launchCodeService.startLaunchCodeAnimation();
+    
+    if (result.success && result.finalCode) {
+      await this.typeMessage(`LAUNCH CODE CRACKED: ${result.finalCode}`, 'system');
+      await this.typeMessage('WARNING: DEFCON 1 ALERT TRIGGERED', 'system');
+      await this.typeMessage('GLOBAL THERMONUCLEAR WAR SIMULATION READY', 'system');
+    } else {
+      await this.typeMessage('LAUNCH CODE SEQUENCE FAILED', 'system');
+      await this.typeMessage('ACCESS DENIED: INSUFFICIENT CLEARANCE', 'system');
+    }
+    
+    setTimeout(() => this.focusInput(), 1000);
+  }
+
+  // Helper methods for launch code animation display
+  getCurrentCode(): string {
+    if (!this.launchCodeAnimation?.codes?.length) {
+      return '';
+    }
+    return this.launchCodeAnimation.codes[this.launchCodeAnimation.codes.length - 1]?.code || '';
+  }
+
+  getTimeRemaining(): number {
+    if (!this.launchCodeAnimation?.estimatedTimeRemaining) {
+      return 0;
+    }
+    return Math.ceil(this.launchCodeAnimation.estimatedTimeRemaining / 1000);
   }
 }

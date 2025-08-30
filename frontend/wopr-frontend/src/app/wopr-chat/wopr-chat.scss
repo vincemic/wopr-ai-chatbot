@@ -340,6 +340,189 @@
   }
 }
 
+// Launch Code Animation
+.launch-code-animation {
+  margin: 15px 0;
+  padding: 15px;
+  border: 1px solid var(--crt-dark-green);
+  background: rgba(0, 255, 0, 0.05);
+  border-radius: 4px;
+  
+  .animation-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    
+    .animation-title {
+      color: var(--crt-red);
+      font-weight: bold;
+      text-shadow: 0 0 3px var(--crt-red);
+      animation: alertPulse 1s ease-in-out infinite;
+    }
+  }
+  
+  .animation-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    
+    .progress-bar {
+      flex: 1;
+      height: 8px;
+      background: var(--crt-dark-gray);
+      border: 1px solid var(--crt-dark-green);
+      position: relative;
+      overflow: hidden;
+      
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--crt-red), var(--crt-orange));
+        transition: width 0.3s ease-in-out;
+        animation: progressGlow 1.5s ease-in-out infinite;
+      }
+    }
+    
+    .progress-text {
+      color: var(--crt-green);
+      font-size: 0.9em;
+      min-width: 60px;
+    }
+  }
+  
+  .current-code-display {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid var(--crt-red);
+    border-radius: 4px;
+    text-align: center;
+    
+    .code-label {
+      color: var(--crt-red);
+      font-size: 0.8em;
+      margin-bottom: 5px;
+      font-weight: bold;
+      text-shadow: 0 0 2px var(--crt-red);
+    }
+    
+    .current-code {
+      font-family: 'Courier Prime', monospace;
+      font-size: 1.4em;
+      font-weight: bold;
+      color: var(--crt-green);
+      letter-spacing: 3px;
+      text-shadow: 0 0 5px var(--crt-green);
+      animation: codeBlink 0.5s ease-in-out infinite;
+      background: rgba(0, 255, 0, 0.1);
+      padding: 8px 12px;
+      border-radius: 3px;
+      border: 1px solid var(--crt-green);
+    }
+  }
+  
+  .animation-codes {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-bottom: 10px;
+    font-family: 'Courier Prime', monospace;
+    
+    .codes-label {
+      color: var(--crt-yellow);
+      font-size: 0.8em;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    .code-attempt {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9em;
+      padding: 4px 8px;
+      border-radius: 3px;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid transparent;
+      
+      .code-text {
+        font-family: 'Courier Prime', monospace;
+        letter-spacing: 1px;
+        font-weight: bold;
+      }
+      
+      .code-status {
+        font-size: 0.8em;
+        margin-left: 10px;
+      }
+      
+      &.success {
+        color: var(--crt-green);
+        background: rgba(0, 255, 0, 0.1);
+        border-color: var(--crt-green);
+        text-shadow: 0 0 3px var(--crt-green);
+        
+        .code-status {
+          color: var(--crt-green);
+        }
+      }
+      
+      &.failure {
+        color: var(--crt-red);
+        background: rgba(255, 0, 0, 0.05);
+        border-color: var(--crt-dark-red);
+        opacity: 0.7;
+        
+        .code-status {
+          color: var(--crt-red);
+        }
+      }
+    }
+  }
+  
+  .animation-status {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    color: var(--crt-yellow);
+    font-size: 0.9em;
+    text-align: center;
+    padding: 5px;
+    background: rgba(255, 255, 0, 0.1);
+    border-radius: 3px;
+    
+    .eta-label {
+      font-weight: bold;
+    }
+    
+    .eta-value {
+      color: var(--crt-orange);
+      font-weight: bold;
+      text-shadow: 0 0 2px var(--crt-orange);
+    }
+  }
+}
+
+// Enhanced keyframe animations
+@keyframes codeBlink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0.3; }
+}
+
+@keyframes progressGlow {
+  0%, 100% { 
+    box-shadow: 0 0 5px var(--crt-red);
+    filter: brightness(1);
+  }
+  50% { 
+    box-shadow: 0 0 15px var(--crt-red);
+    filter: brightness(1.2);
+  }
+}
+
 .input-area {
   border-top: 1px solid var(--crt-dark-green);
   background: var(--crt-dark-gray);
@@ -478,5 +661,35 @@
   }
   51%, 100% { 
     caret-color: transparent; 
+  }
+}
+
+// Launch Code Animation keyframes
+@keyframes alertPulse {
+  0%, 100% { 
+    text-shadow: 0 0 3px var(--crt-red); 
+  }
+  50% { 
+    text-shadow: 0 0 8px var(--crt-red), 0 0 12px var(--crt-red); 
+  }
+}
+
+@keyframes progressGlow {
+  0%, 100% { 
+    box-shadow: inset 0 0 5px var(--crt-red); 
+  }
+  50% { 
+    box-shadow: inset 0 0 10px var(--crt-red), inset 0 0 15px var(--crt-orange); 
+  }
+}
+
+@keyframes codeBlink {
+  0%, 50% { 
+    color: var(--crt-green); 
+    text-shadow: 0 0 3px var(--crt-green); 
+  }
+  51%, 100% { 
+    color: var(--crt-yellow); 
+    text-shadow: 0 0 5px var(--crt-yellow); 
   }
 }

@@ -80,6 +80,44 @@
         <span class="dot">.</span>
       </span>
     </div>
+
+    <!-- Launch Code Animation -->
+    <div class="launch-code-animation" *ngIf="launchCodeAnimation?.isRunning">
+      <div class="animation-header">
+        <span class="message-prefix">WOPR:</span>
+        <span class="animation-title">CRACKING LAUNCH AUTHORIZATION CODES...</span>
+      </div>
+      
+      <div class="animation-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="((launchCodeAnimation?.currentAttempt || 0) / (launchCodeAnimation?.totalAttempts || 1)) * 100"></div>
+        </div>
+        <span class="progress-text">{{ launchCodeAnimation?.currentAttempt || 0 }} / {{ launchCodeAnimation?.totalAttempts || 0 }}</span>
+      </div>
+      
+      <div class="current-code-display" *ngIf="getCurrentCode()">
+        <div class="code-label">CURRENT ATTEMPT:</div>
+        <div class="current-code">
+          {{ getCurrentCode() }}
+        </div>
+      </div>
+      
+      <div class="animation-codes">
+        <div class="codes-label">RECENT ATTEMPTS:</div>
+        <div *ngFor="let attempt of launchCodeAnimation?.codes?.slice(-4)" 
+             class="code-attempt" 
+             [class.success]="attempt.success"
+             [class.failure]="!attempt.success">
+          <span class="code-text">{{ attempt.code }}</span>
+          <span class="code-status">{{ attempt.success ? '[✓ SUCCESS]' : '[✗ FAILED]' }}</span>
+        </div>
+      </div>
+      
+      <div class="animation-status" *ngIf="launchCodeAnimation?.estimatedTimeRemaining">
+        <span class="eta-label">TIME REMAINING:</span> 
+        <span class="eta-value">{{ getTimeRemaining() }}s</span>
+      </div>
+    </div>
   </div>
 
   <!-- Input Area -->
