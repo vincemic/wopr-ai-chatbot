@@ -34,6 +34,17 @@ Experience the authentic 1983 War Games WOPR computer interface directly in your
 
 ## Recent Enhancements
 
+### Missile Animation System
+
+- **Nuclear Launch Visualization**: After successful launch code cracking, witness a dramatic missile exchange between Russia and USA
+- **Authentic Ballistic Trajectories**: 12 missiles total (6 from each country) following realistic parabolic flight paths across the world map
+- **Sequential Launch Pattern**: Russia launches first (6 ICBMs with 800ms intervals), followed by USA retaliation (6 missiles with 700ms intervals)
+- **Real-Time Vector Animation**: Moving missile dots with glowing trail effects rendered on the world map canvas overlay
+- **Strategic Target Selection**: Missiles target major cities including Moscow, Washington DC, New York, Los Angeles, St. Petersburg, Chicago
+- **Nuclear Impact Effects**: Expanding explosion circles with authentic yellow/white nuclear blast visualization
+- **Movie-Accurate Conclusion**: Sequence ends with WOPR's famous "STRANGE GAME. THE ONLY WINNING MOVE IS NOT TO PLAY."
+- **Independent Testing**: `/missiles` command allows testing the animation system without launch code sequence
+
 ### Local Storage Settings System
 
 - **Persistent Configuration**: Complete settings management with localStorage persistence across browser sessions
@@ -106,6 +117,7 @@ ai-wopr/
 - **Multiple Visual Themes** including Classic Green, Amber, Blue, and Matrix with real-time switching
 - **Authentic CRT terminal styling** with phosphor glow, scan lines, and dot-matrix effects
 - **Real-time chat interface** with WOPR computer personality and character-by-character typing
+- **Nuclear Missile Animation System** with intercontinental ballistic missile trajectories and impact visualization
 - **Text-to-Speech** functionality with robotic voice configuration and voice selection
 - **Terminal beeping sounds** using Web Audio API (800Hz square wave)
 - **Launch Code Computer Beeps** with authentic 1980s computer sounds during cracking sequences
@@ -298,6 +310,8 @@ WOPR: AVAILABLE COMMANDS:
   /help - SHOW THIS HELP
   /config - OPEN SETTINGS PANEL
   /apikey [key] - SET OPENAI API KEY
+  /launchcodes, /crack - CRACK NORAD LAUNCH CODES
+  /missiles - TEST MISSILE ANIMATION (RUSSIA VS USA)
   /export-settings - BACKUP SETTINGS
   /reset-settings - RESTORE DEFAULTS
   [... additional commands listed]
@@ -462,7 +476,38 @@ The WOPR interface delivers an authentic 1983 computer experience through sophis
 - **Automatic synchronization** with launch code animation start/stop
 - **Era-appropriate audio** matching 1980s computer systems
 
-## 🐛 Troubleshooting
+## � Nuclear Missile Animation System
+
+The WOPR system features a dramatic nuclear exchange visualization that activates after successful launch code authentication:
+
+### Animation Sequence
+
+- **12 Total Missiles**: 6 from Russia, 6 retaliatory missiles from USA
+- **Sequential Launch Pattern**: Russia launches first with 800ms intervals, USA responds with 700ms intervals
+- **Authentic Flight Duration**: 15-20 second ballistic trajectories with realistic timing
+- **Strategic Targeting**: Major cities including Moscow, Washington DC, New York, Los Angeles, St. Petersburg, Chicago
+
+### Visual Elements
+
+- **Ballistic Trajectories**: Parabolic flight paths calculated with realistic arc physics
+- **Real-Time Movement**: Moving missile dots with glowing trail effects rendered on world map canvas
+- **Launch Site Visualization**: Russian and USA launch facilities highlighted during active phases
+- **Nuclear Impact Effects**: Expanding yellow/white explosion circles with 3-second duration
+- **Geographic Accuracy**: Authentic coordinates for major military installations and target cities
+
+### Technical Implementation
+
+- **Canvas Overlay Rendering**: Vector animation system integrated with existing world map component
+- **RxJS State Management**: Reactive missile tracking with BehaviorSubject observables
+- **Performance Optimized**: 60fps animation with efficient canvas drawing and memory management
+- **Movie-Accurate Conclusion**: Sequence ends with WOPR's famous realization about nuclear warfare
+
+### Commands
+
+- `/launchcodes` or `/crack` - Full launch code sequence followed by missile animation
+- `/missiles` - Direct missile animation test without launch code prerequisite
+
+## �🐛 Troubleshooting
 
 ### Common Issues
 

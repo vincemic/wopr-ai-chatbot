@@ -125,6 +125,43 @@
         </div>
       </div>
     </div>
+
+    <!-- Missile Animation Display -->
+    <div class="missile-animation" *ngIf="missileAnimationState?.isRunning && !launchCodeAnimation?.isRunning">
+      <div class="animation-header">
+        <span class="message-prefix">WOPR:</span>
+        <span class="animation-title">GLOBAL THERMONUCLEAR WAR SIMULATION</span>
+      </div>
+      
+      <!-- Full-screen missile animation -->
+      <div class="missile-fullscreen">
+        <!-- World Map Display (full area) -->
+        <div class="world-map-fullscreen">
+          <app-world-map></app-world-map>
+        </div>
+        
+        <!-- Missile status overlay -->
+        <div class="missile-overlay">
+          <div class="missile-status">
+            <div class="phase-display">
+              <span class="phase-label">PHASE:</span> 
+              <span class="phase-value">{{ missileAnimationState?.currentPhase?.toUpperCase() }}</span>
+            </div>
+            
+            <div class="missile-counts">
+              <div class="launch-count">
+                <span class="country-label">RUSSIA:</span>
+                <span class="missile-count">{{ missileAnimationState?.russianMissilesLaunched || 0 }}/6 MISSILES</span>
+              </div>
+              <div class="launch-count">
+                <span class="country-label">USA:</span>
+                <span class="missile-count">{{ missileAnimationState?.usaMissilesLaunched || 0 }}/6 MISSILES</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Input Area -->

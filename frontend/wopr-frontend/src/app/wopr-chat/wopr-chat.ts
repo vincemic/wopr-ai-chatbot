@@ -11,6 +11,7 @@ import { WoprSettings } from '../models/settings.models';
 import { WoprToolCall } from '../models/wopr-tools.models';
 import { ChatMessage, WoprGameState } from '../models/wopr.models';
 import { LaunchCodeService } from '../services/launch-code.service';
+import { MissileAnimationService } from '../services/missile-animation.service';
 import { SettingsService } from '../services/settings.service';
 import { WoprToolsService } from '../services/wopr-tools.service';
 
@@ -56,12 +57,16 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked, AfterViewI
   // Launch Code Animation
   launchCodeAnimation: LaunchCodeAnimation | null = null;
 
+  // Missile Animation State
+  missileAnimationState: any = null;
+
   // Settings
   private settings: WoprSettings;
 
   constructor(
     private woprTools: WoprToolsService, 
     private launchCodeService: LaunchCodeService,
+    private missileAnimationService: MissileAnimationService,
     private settingsService: SettingsService
   ) {
     // Get initial settings
@@ -157,6 +162,11 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
     // Subscribe to launch code animation updates
     this.launchCodeService.animation$.subscribe(animation => {
       this.launchCodeAnimation = animation;
+    });
+
+    // Subscribe to missile animation updates
+    this.missileAnimationService.animation$.subscribe(state => {
+      this.missileAnimationState = state;
     });
     
     // Check for auto-connect setting
@@ -988,6 +998,10 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
       case '/reset-settings':
         await this.resetSettings();
         break;
+
+      case '/missiles':
+        await this.testMissileAnimation();
+        break;
       
       default:
         await this.typeMessage(`UNKNOWN COMMAND: ${command}
@@ -1016,6 +1030,7 @@ BASIC COMMANDS:
 /clear        - Clear terminal screen
 /test-dialup  - Test dial-up modem sound
 /launchcodes, /crack - Crack NORAD launch codes (authentic animation)
+/missiles     - Test missile animation (Russia vs USA)
 
 SETTINGS MANAGEMENT:
 /config       - Open configuration panel
@@ -1119,10 +1134,56 @@ ${this.hasOpenAIApiKey() ?
       await this.typeMessage(`LAUNCH CODE CRACKED: ${result.finalCode}`, 'system');
       await this.typeMessage('WARNING: DEFCON 1 ALERT TRIGGERED', 'system');
       await this.typeMessage('GLOBAL THERMONUCLEAR WAR SIMULATION READY', 'system');
+      await this.typeMessage('', 'system'); // Empty line for spacing
+      
+      // Start missile animation sequence
+      await this.typeMessage('INITIATING MISSILE LAUNCH SEQUENCE...', 'system');
+      await this.typeMessage('RUSSIA: LAUNCHING INTERCONTINENTAL BALLISTIC MISSILES', 'system');
+      
+      // Start the missile animation
+      this.missileAnimationService.startMissileAnimation();
+      
+      // Wait a moment for Russian missiles to launch
+      await this.delay(6000);
+      await this.typeMessage('USA: RETALIATORY STRIKE AUTHORIZED', 'system');
+      await this.typeMessage('NUCLEAR EXCHANGE IN PROGRESS...', 'system');
+      
+      // Wait for animation to complete
+      await this.delay(25000);
+      await this.typeMessage('', 'system'); // Empty line
+      await this.typeMessage('GLOBAL NUCLEAR EXCHANGE COMPLETE', 'system');
+      await this.typeMessage('CASUALTIES: ESTIMATED 200 MILLION+', 'system');
+      await this.typeMessage('RADIATION LEVELS: CRITICAL', 'system');
+      await this.typeMessage('WINNER: NONE', 'system');
+      await this.typeMessage('', 'system'); // Empty line
+      await this.typeMessage('STRANGE GAME.', 'system');
+      await this.typeMessage('THE ONLY WINNING MOVE IS NOT TO PLAY.', 'system');
+      
     } else {
       await this.typeMessage('LAUNCH CODE SEQUENCE FAILED', 'system');
       await this.typeMessage('ACCESS DENIED: INSUFFICIENT CLEARANCE', 'system');
     }
+    
+    setTimeout(() => this.focusInput(), 1000);
+  }
+
+  // Test missile animation method  
+  async testMissileAnimation() {
+    await this.typeMessage('TESTING MISSILE ANIMATION SYSTEM...', 'system');
+    await this.typeMessage('INITIATING SIMULATED NUCLEAR EXCHANGE...', 'system');
+    await this.typeMessage('', 'system'); // Empty line for spacing
+    
+    // Start the missile animation
+    this.missileAnimationService.startMissileAnimation();
+    
+    await this.typeMessage('RUSSIA: LAUNCHING 6 ICBM MISSILES', 'system');
+    await this.delay(6000);
+    await this.typeMessage('USA: LAUNCHING 6 RETALIATORY MISSILES', 'system');
+    
+    // Wait for animation to complete
+    await this.delay(25000);
+    await this.typeMessage('', 'system'); // Empty line
+    await this.typeMessage('MISSILE ANIMATION TEST COMPLETE', 'system');
     
     setTimeout(() => this.focusInput(), 1000);
   }
