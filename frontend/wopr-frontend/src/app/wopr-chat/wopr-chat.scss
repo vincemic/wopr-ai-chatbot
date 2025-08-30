@@ -504,6 +504,44 @@
       text-shadow: 0 0 2px var(--crt-orange);
     }
   }
+
+  // New split layout for cracking animation and world map
+  .cracking-layout {
+    display: flex;
+    gap: 20px;
+    margin-top: 15px;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .cracking-details {
+      flex: 1;
+      min-width: 0; // Allows flex shrinking
+    }
+    
+    .world-map-section {
+      flex: 1;
+      min-width: 300px;
+      
+      @media (max-width: 768px) {
+        min-width: 100%;
+      }
+      
+      .map-header {
+        color: var(--crt-red);
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 10px;
+        font-size: 0.9em;
+        text-shadow: 0 0 3px var(--crt-red);
+        letter-spacing: 1px;
+        padding: 5px;
+        border-bottom: 1px solid var(--crt-dark-red);
+      }
+    }
+  }
 }
 
 // Enhanced keyframe animations

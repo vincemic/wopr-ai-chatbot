@@ -1,0 +1,145 @@
+.world-map-container {
+  position: relative;
+  display: inline-block;
+  border: 2px solid #00ff00;
+  border-radius: 4px;
+  background: #000;
+  box-shadow: 
+    0 0 10px #00ff00,
+    inset 0 0 10px rgba(0, 255, 0, 0.1);
+  
+  &.blinking {
+    animation: mapBlink 0.5s infinite alternate;
+  }
+}
+
+.world-map-canvas {
+  display: block;
+  background: #000;
+  cursor: crosshair;
+  
+  // CRT scanline effect
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(0, 255, 0, 0.03) 1px,
+      rgba(0, 255, 0, 0.03) 2px
+    );
+  }
+}
+
+.map-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.threat-indicator {
+  position: absolute;
+  color: #ff0000;
+  font-family: 'Courier Prime', 'Courier New', monospace;
+  font-size: 10px;
+  font-weight: bold;
+  text-shadow: 0 0 5px #ff0000;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  white-space: nowrap;
+  
+  &.pulsing {
+    animation: threatPulse 1s infinite;
+  }
+  
+  &::before {
+    content: '⚠';
+    margin-right: 2px;
+    color: #ff0000;
+  }
+}
+
+// Animations
+@keyframes mapBlink {
+  0% {
+    box-shadow: 
+      0 0 10px #00ff00,
+      inset 0 0 10px rgba(0, 255, 0, 0.1);
+  }
+  100% {
+    box-shadow: 
+      0 0 20px #00ff00,
+      inset 0 0 20px rgba(0, 255, 0, 0.3);
+  }
+}
+
+@keyframes threatPulse {
+  0% {
+    opacity: 1;
+    text-shadow: 0 0 5px #ff0000;
+  }
+  50% {
+    opacity: 0.5;
+    text-shadow: 0 0 15px #ff0000;
+  }
+  100% {
+    opacity: 1;
+    text-shadow: 0 0 5px #ff0000;
+  }
+}
+
+// Responsive sizing
+@media (max-width: 768px) {
+  .world-map-container {
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
+  .world-map-canvas {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .threat-indicator {
+    font-size: 8px;
+  }
+}
+
+// WOPR-style glow effects
+.world-map-container:hover {
+  box-shadow: 
+    0 0 15px #00ff00,
+    inset 0 0 15px rgba(0, 255, 0, 0.2);
+}
+
+// Status indicators for different map states
+.world-map-container.defcon-1 {
+  border-color: #ff0000;
+  box-shadow: 
+    0 0 20px #ff0000,
+    inset 0 0 20px rgba(255, 0, 0, 0.2);
+}
+
+.world-map-container.defcon-2 {
+  border-color: #ff8800;
+  box-shadow: 
+    0 0 15px #ff8800,
+    inset 0 0 15px rgba(255, 136, 0, 0.2);
+}
+
+.world-map-container.defcon-3 {
+  border-color: #ffff00;
+  box-shadow: 
+    0 0 10px #ffff00,
+    inset 0 0 10px rgba(255, 255, 0, 0.2);
+}

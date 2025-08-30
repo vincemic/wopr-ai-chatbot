@@ -7,10 +7,11 @@ import { WoprToolsService } from '../services/wopr-tools.service';
 import { WoprToolCall, WoprToolResult } from '../models/wopr-tools.models';
 import { LaunchCodeService } from '../services/launch-code.service';
 import { LaunchCodeAnimation } from '../models/launch-codes.models';
+import { WorldMapComponent } from '../components/world-map/world-map.component';
 
 @Component({
   selector: 'app-wopr-chat',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, WorldMapComponent],
   templateUrl: './wopr-chat.html',
   styleUrl: './wopr-chat.scss'
 })
