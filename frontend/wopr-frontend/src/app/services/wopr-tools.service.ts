@@ -146,6 +146,26 @@ export class WoprToolsService {
             }
           }
         }
+      },
+      {
+        name: 'get_current_location',
+        description: 'Retrieve current geographical location coordinates and address information for tactical analysis',
+        parameters: {
+          type: 'object',
+          properties: {
+            precision: {
+              type: 'string',
+              enum: ['high', 'medium', 'low'],
+              description: 'Location precision level (high = GPS, medium = network, low = approximate)',
+              default: 'medium'
+            },
+            include_address: {
+              type: 'boolean',
+              description: 'Whether to include reverse geocoded address information',
+              default: true
+            }
+          }
+        }
       }
     ];
   }
@@ -189,6 +209,10 @@ export class WoprToolsService {
 
       case 'crack_launch_codes':
         output = await this.crackLaunchCodes(parsedArgs);
+        break;
+
+      case 'get_current_location':
+        output = await this.getCurrentLocation(parsedArgs);
         break;
 
       default:
@@ -491,5 +515,246 @@ ERROR: LAUNCH CODE CRACKING FAILED
 REASON: ${error}
 STATUS: AUTHENTICATION SYSTEM OFFLINE`;
     }
+  }
+
+  private async getCurrentLocation(params: any): Promise<string> {
+    const { precision = 'medium', include_address = true } = params;
+    
+    return new Promise((resolve) => {
+      // Check if geolocation is supported
+      if (!navigator.geolocation) {
+        this.getDefaultLocationData(include_address).then(resolve);
+        return;
+      }
+
+      let options: PositionOptions;
+      
+      // Configure location options based on precision
+      switch (precision) {
+        case 'high':
+          options = {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+          };
+          break;
+        case 'low':
+          options = {
+            enableHighAccuracy: false,
+            timeout: 5000,
+            maximumAge: 600000 // 10 minutes
+          };
+          break;
+        default: // medium
+          options = {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 300000 // 5 minutes
+          };
+      }
+
+      const startTime = Date.now();
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude, accuracy, altitude, heading, speed } = position.coords;
+          const acquisitionTime = Date.now() - startTime;
+          
+          let output = `TACTICAL LOCATION ACQUISITION COMPLETE
+
+COORDINATES ACQUIRED:
+- Latitude: ${latitude.toFixed(6)}°
+- Longitude: ${longitude.toFixed(6)}°
+- Accuracy: ±${accuracy.toFixed(0)} meters
+- Acquisition Time: ${acquisitionTime}ms
+- Precision Level: ${precision.toUpperCase()}
+`;
+
+          // Add additional positioning data if available
+          if (altitude !== null) {
+            output += `- Altitude: ${altitude.toFixed(1)} meters\n`;
+          }
+          if (heading !== null) {
+            output += `- Heading: ${heading.toFixed(0)}° (from North)\n`;
+          }
+          if (speed !== null) {
+            output += `- Speed: ${(speed * 3.6).toFixed(1)} km/h\n`;
+          }
+
+          output += `
+MILITARY GRID REFERENCE:
+${this.generateMGRS(latitude, longitude)}
+
+TACTICAL ASSESSMENT:
+- Position Quality: ${accuracy < 10 ? 'EXCELLENT' : accuracy < 50 ? 'GOOD' : 'FAIR'}
+- Strategic Value: ${this.assessStrategicValue(latitude, longitude)}
+`;
+
+          // Get address information if requested
+          if (include_address) {
+            try {
+              const addressInfo = await this.reverseGeocode(latitude, longitude);
+              output += `
+LOCATION INTELLIGENCE:
+${addressInfo}`;
+            } catch (error) {
+              output += `
+LOCATION INTELLIGENCE: UNAVAILABLE
+REVERSE GEOCODING FAILED`;
+            }
+          }
+
+          output += `
+
+TIMESTAMP: ${new Date().toISOString()}
+CLASSIFICATION: CONFIDENTIAL`;
+
+          resolve(output);
+        },
+        (error) => {
+          // Fall back to default location (Seattle) on any geolocation error
+          this.getDefaultLocationData(include_address).then(resolve);
+        },
+        options
+      );
+    });
+  }
+
+  private generateMGRS(lat: number, lon: number): string {
+    // Simplified MGRS generation for demonstration
+    // In a real implementation, you'd use a proper MGRS library
+    const zone = Math.floor((lon + 180) / 6) + 1;
+    const letter = String.fromCharCode(65 + Math.floor((lat + 80) / 8));
+    
+    // Generate grid square
+    const easting = Math.floor(((lon + 180) % 6) * 100000);
+    const northing = Math.floor(((lat + 80) % 8) * 100000);
+    
+    return `${zone}${letter} ${easting.toString().padStart(5, '0')} ${northing.toString().padStart(5, '0')}`;
+  }
+
+  private assessStrategicValue(lat: number, lon: number): string {
+    // Simple strategic assessment based on coordinates
+    const absLat = Math.abs(lat);
+    const absLon = Math.abs(lon);
+    
+    if (absLat > 60) return 'ARCTIC/POLAR - STRATEGIC BOMBER ROUTES';
+    if (absLat < 10) return 'EQUATORIAL - LAUNCH OPTIMAL';
+    if (absLon > 120) return 'PACIFIC THEATER - NAVAL OPERATIONS';
+    if (absLon < 30) return 'ATLANTIC THEATER - NATO ZONE';
+    
+    return 'CONTINENTAL - TACTICAL SIGNIFICANCE';
+  }
+
+  private async reverseGeocode(lat: number, lon: number): Promise<string> {
+    try {
+      // Using a free geocoding service (OpenStreetMap Nominatim)
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1`,
+        {
+          headers: {
+            'User-Agent': 'WOPR-Tactical-System/1.0'
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Geocoding failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data || !data.address) {
+        return 'ADDRESS: CLASSIFICATION RESTRICTED';
+      }
+
+      const addr = data.address;
+      let addressOutput = '';
+      
+      if (addr.house_number && addr.road) {
+        addressOutput += `- Address: ${addr.house_number} ${addr.road}\n`;
+      } else if (addr.road) {
+        addressOutput += `- Location: ${addr.road}\n`;
+      }
+      
+      if (addr.city || addr.town || addr.village) {
+        addressOutput += `- City: ${addr.city || addr.town || addr.village}\n`;
+      }
+      
+      if (addr.state || addr.region) {
+        addressOutput += `- Region: ${addr.state || addr.region}\n`;
+      }
+      
+      if (addr.country) {
+        addressOutput += `- Country: ${addr.country}\n`;
+      }
+      
+      if (addr.postcode) {
+        addressOutput += `- Postal Code: ${addr.postcode}\n`;
+      }
+
+      return addressOutput || 'ADDRESS: REMOTE LOCATION';
+      
+    } catch (error) {
+      return `ADDRESS: GEOCODING SERVICE UNAVAILABLE\nERROR: ${error}`;
+    }
+  }
+
+  private async getDefaultLocationData(includeAddress: boolean = true): Promise<string> {
+    // Seattle, Washington coordinates (default fallback location)
+    const seattle = {
+      latitude: 47.6062,
+      longitude: -122.3321,
+      accuracy: 1000, // 1km accuracy for default location
+      city: 'Seattle',
+      state: 'Washington',
+      country: 'United States'
+    };
+
+    const acquisitionTime = 0; // Instant for default location
+    
+    let output = `TACTICAL LOCATION ACQUISITION COMPLETE
+[USING DEFAULT NORAD SECTOR COORDINATES]
+
+COORDINATES ACQUIRED:
+- Latitude: ${seattle.latitude.toFixed(6)}°
+- Longitude: ${seattle.longitude.toFixed(6)}°
+- Accuracy: ±${seattle.accuracy} meters (DEFAULT SECTOR)
+- Acquisition Time: ${acquisitionTime}ms
+- Precision Level: DEFAULT FALLBACK
+- Data Source: NORAD SECTOR DATABASE
+
+MILITARY GRID REFERENCE:
+${this.generateMGRS(seattle.latitude, seattle.longitude)}
+
+TACTICAL ASSESSMENT:
+- Position Quality: BASELINE
+- Strategic Value: ${this.assessStrategicValue(seattle.latitude, seattle.longitude)}
+- Sector: PACIFIC NORTHWEST COMMAND
+`;
+
+    // Add address information if requested
+    if (includeAddress) {
+      output += `
+LOCATION INTELLIGENCE:
+- City: ${seattle.city}
+- Region: ${seattle.state}
+- Country: ${seattle.country}
+- Tactical Zone: PUGET SOUND SECTOR
+- Military District: 13th COAST GUARD DISTRICT
+- Naval Command: NAVAL BASE KITSAP REGION
+`;
+    }
+
+    output += `
+
+FALLBACK STATUS: ACTIVE
+NOTE: GPS UNAVAILABLE - USING NORAD DEFAULT COORDINATES
+RECOMMENDATION: ENABLE LOCATION SERVICES FOR PRECISE POSITIONING
+
+TIMESTAMP: ${new Date().toISOString()}
+CLASSIFICATION: CONFIDENTIAL`;
+
+    return output;
   }
 }

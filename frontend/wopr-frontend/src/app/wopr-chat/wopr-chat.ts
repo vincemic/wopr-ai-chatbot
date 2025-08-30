@@ -1077,6 +1077,11 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
       case '/worldmap':
         await this.toggleWorldMap();
         break;
+
+      case '/location':
+      case '/gps':
+        await this.testLocationLookup();
+        break;
       
       default:
         await this.typeMessage(`UNKNOWN COMMAND: ${command}
@@ -1108,6 +1113,7 @@ BASIC COMMANDS:
 /missiles     - Test missile animation (Russia vs USA)
 /cities, /markers - Toggle city markers on world map
 /map, /worldmap - Toggle world map display
+/location, /gps - Test tactical positioning system (GPS lookup)
 
 SETTINGS MANAGEMENT:
 /config       - Open configuration panel
@@ -1246,7 +1252,34 @@ ${this.hasOpenAIApiKey() ?
     setTimeout(() => this.focusInput(), 1000);
   }
 
-  // Settings management methods
+  // Test location lookup method  
+  async testLocationLookup() {
+    await this.typeMessage('INITIATING TACTICAL POSITIONING SYSTEM...', 'system');
+    await this.typeMessage('ACCESSING GPS CONSTELLATION...', 'assistant');
+    
+    try {
+      // Use the WOPR tools service to get location
+      const toolCall: WoprToolCall = {
+        id: 'test_location_' + Date.now(),
+        type: 'function',
+        function: {
+          name: 'get_current_location',
+          arguments: JSON.stringify({
+            precision: 'high',
+            include_address: true
+          })
+        }
+      };
+      
+      const result = await this.woprTools.executeToolCall(toolCall);
+      await this.typeMessage(result.output, 'assistant');
+      
+    } catch (error) {
+      await this.typeMessage(`LOCATION ACQUISITION FAILED: ${error}`, 'system');
+    }
+    
+    setTimeout(() => this.focusInput(), 1000);
+  }
   async showSettings() {
     // Show the visual settings panel
     if (this.settingsPanel) {

@@ -2,15 +2,15 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import {
-  MissileAnimationState,
-  MissileImpact,
-  MissileTarget,
-  MissileTrajectory,
-  RUSSIA_LAUNCH_SITES,
-  RUSSIA_TARGETS,
-  TrajectoryPoint,
-  USA_LAUNCH_SITES,
-  USA_TARGETS
+    MissileAnimationState,
+    MissileImpact,
+    MissileTarget,
+    MissileTrajectory,
+    RUSSIA_LAUNCH_SITES,
+    RUSSIA_TARGETS,
+    TrajectoryPoint,
+    USA_LAUNCH_SITES,
+    USA_TARGETS
 } from '../models/missile.models';
 
 @Injectable({

@@ -48,3 +48,16 @@ export interface NoradData {
   data: any;
   classification: 'UNCLASSIFIED' | 'CONFIDENTIAL' | 'SECRET' | 'TOP SECRET';
 }
+
+export interface LocationData {
+  latitude: number;
+  longitude: number;
+  accuracy: number;
+  altitude?: number;
+  heading?: number;
+  speed?: number;
+  address?: string;
+  mgrs?: string;
+  strategicValue?: string;
+  timestamp: string;
+}
