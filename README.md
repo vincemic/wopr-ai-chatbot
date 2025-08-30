@@ -16,8 +16,6 @@ Experience the authentic 1983 War Games WOPR computer interface directly in your
 
 ### Screenshots
 
-<div align="center">
-
 **Initial Connection Prompt**
 ![WOPR Connection Prompt](wopr-interface-screenshot.png)
 
@@ -27,31 +25,33 @@ Experience the authentic 1983 War Games WOPR computer interface directly in your
 **Chat Interface with WOPR**
 ![WOPR Chat Interface](wopr-chat-screenshot.png)
 
-</div>
-
 > **Note**: For full OpenAI integration, follow the local setup instructions below to configure your API key.
 
 ## Recent Enhancements
 
 ### Slash Command Interface
+
 - **Terminal-Style Commands**: Replaced UI toggle buttons with `/help`, `/tts`, `/beep`, `/dialup`, `/status`, `/reset`, `/apikey` commands
 - **Authentic Terminal Experience**: Command-driven interface matching 1983 computer systems
 - **Comprehensive Help System**: `/help` command provides complete usage instructions
 - **Command Validation**: Smart error handling for unknown or malformed commands
 
 ### Mobile Touch Support
+
 - **Connection Prompt Enhancement**: Mobile devices can now interact with the "Connect yes or no?" prompt using touch gestures
 - **Haptic Feedback**: Provides tactile feedback on supported mobile devices
 - **Responsive Design**: Optimized touch targets and mobile-friendly interface
 - **Cross-Platform Compatibility**: Works seamlessly on desktop (mouse/keyboard) and mobile (touch)
 
 ### OpenAI Integration
+
 - **Direct Browser-to-OpenAI Communication**: No backend required, uses browser fetch API
 - **User-Provided API Keys**: Secure localStorage-based API key management
 - **Cost-Effective Model**: Uses gpt-4o-mini for optimal performance and cost balance
 - **WOPR Personality System**: Complete War Games character implementation with authentic responses
 
 ### CI/CD Improvements
+
 - **GitHub Pages Deployment**: Automatic deployment with frontend-only architecture
 - **Comprehensive Testing**: Playwright test suite with 16 test scenarios
 - **Cross-Browser Support**: Validated on Chromium, WebKit, and mobile browsers
@@ -412,5 +412,3 @@ Feel free to contribute improvements, additional games, or enhanced WOPR persona
 **WOPR STATUS**: OPERATIONAL  
 **DEFCON LEVEL**: 5  
 **READY TO PLAY**: ✓
- 
- 
