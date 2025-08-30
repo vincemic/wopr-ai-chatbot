@@ -21,8 +21,8 @@ Experience the authentic 1983 War Games WOPR computer interface directly in your
 **Dial-Up Connection Sequence**
 ![WOPR Dial-Up Sequence](wopr-dialup-screenshot.png)
 
-**System Cracking Sequence**
-![WOPR Cracking Sequence](wopr-cracking-sequence.png)
+**Password Cracking Sequence**
+![WOPR Password Cracking Sequence](wopr-password-cracking-sequence.png)
 
 **Chat Interface with WOPR**
 ![WOPR Chat Interface](wopr-chat-screenshot.png)
