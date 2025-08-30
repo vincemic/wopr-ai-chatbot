@@ -1,4 +1,4 @@
-<div class="wopr-terminal" tabindex="0">
+<div class="wopr-terminal">
   
   <!-- Connection Prompt Screen -->
   <div class="connection-prompt" *ngIf="showConnectionPrompt" 
@@ -99,7 +99,10 @@
       <div class="cracking-fullscreen">
         <!-- World Map Display (full area) -->
         <div class="world-map-fullscreen">
-          <app-world-map></app-world-map>
+          <app-world-map 
+            [showOverlay]="showCityMarkers" 
+            [threats]="cityThreats">
+          </app-world-map>
         </div>
         
         <!-- Centered code overlay -->
@@ -137,7 +140,10 @@
       <div class="missile-fullscreen">
         <!-- World Map Display (full area) -->
         <div class="world-map-fullscreen">
-          <app-world-map></app-world-map>
+          <app-world-map 
+            [showOverlay]="showCityMarkers" 
+            [threats]="cityThreats">
+          </app-world-map>
         </div>
         
         <!-- Missile status overlay -->
@@ -161,6 +167,16 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Standalone World Map Display -->
+  <div class="standalone-map" *ngIf="showWorldMap">
+    <div class="map-container">
+      <app-world-map 
+        [showOverlay]="showCityMarkers" 
+        [threats]="cityThreats">
+      </app-world-map>
     </div>
   </div>
 

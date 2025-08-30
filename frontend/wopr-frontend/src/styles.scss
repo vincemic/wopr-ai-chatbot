@@ -5,6 +5,12 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  cursor: default; // Default cursor for all elements
+}
+
+// Only specific elements should have text cursors
+input[type="text"], textarea {
+  cursor: text !important;
 }
 
 :root {

@@ -1,16 +1,16 @@
 
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import {
   MissileAnimationState,
-  MissileTrajectory,
-  TrajectoryPoint,
-  RUSSIA_LAUNCH_SITES,
-  USA_LAUNCH_SITES,
-  RUSSIA_TARGETS,
-  USA_TARGETS,
+  MissileImpact,
   MissileTarget,
-  MissileImpact
+  MissileTrajectory,
+  RUSSIA_LAUNCH_SITES,
+  RUSSIA_TARGETS,
+  TrajectoryPoint,
+  USA_LAUNCH_SITES,
+  USA_TARGETS
 } from '../models/missile.models';
 
 @Injectable({
@@ -102,7 +102,7 @@ export class MissileAnimationService {
 
   private async launchMissile(country: 'russia' | 'usa', index: number): Promise<void> {
     const launchSites = country === 'russia' ? RUSSIA_LAUNCH_SITES : USA_LAUNCH_SITES;
-    const targets = country === 'russia' ? RUSSIA_TARGETS : USA_TARGETS;
+    const targets = country === 'russia' ? USA_TARGETS : RUSSIA_TARGETS; // Russia targets USA, USA targets Russia
 
     const origin = launchSites[index % launchSites.length];
     const target = targets[index % targets.length];
@@ -155,11 +155,17 @@ export class MissileAnimationService {
       const x = origin.x + dx * t;
       const y = origin.y + dy * t;
       
-      // Add parabolic arc (highest at midpoint)
-      const arcY = y - (4 * arcHeight * t * (1 - t));
+      // Add parabolic arc (highest at midpoint) - but ensure final point lands exactly on target
+      let arcY: number;
+      if (i === numPoints) {
+        // Force final point to be exactly on target
+        arcY = target.y;
+      } else {
+        arcY = y - (4 * arcHeight * t * (1 - t));
+      }
       
       points.push({
-        x,
+        x: i === numPoints ? target.x : x, // Force final x to be exactly on target
         y: arcY,
         timestamp: Date.now() + (t * 20000) // 20 second total flight time
       });
@@ -191,10 +197,11 @@ export class MissileAnimationService {
 
         // Check if missile has reached target
         if (progress >= 1 || newPointIndex >= missile.points.length - 1) {
-          // Missile impact
+          // Missile impact - use the actual final trajectory point for accurate positioning
+          const finalPoint = missile.points[missile.points.length - 1];
           const impact: MissileImpact = {
-            x: missile.target.x,
-            y: missile.target.y,
+            x: finalPoint.x,
+            y: finalPoint.y,
             timestamp: now,
             targetName: missile.target.name
           };

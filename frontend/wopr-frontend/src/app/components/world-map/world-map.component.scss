@@ -4,7 +4,7 @@
   border: 2px solid #00ff00;
   border-radius: 4px;
   background: #000;
-  max-width: 1200px; // Optimized for new resolution
+  max-width: 1536px; // Updated to match actual world.png resolution
   width: 100%;
   box-shadow: 
     0 0 10px #00ff00,
@@ -114,11 +114,11 @@
 
 .threat-indicator {
   position: absolute;
-  color: #ff0000;
+  color: #00ff00;  // Changed to green for city markers
   font-family: 'Courier Prime', 'Courier New', monospace;
   font-size: 10px;
   font-weight: bold;
-  text-shadow: 0 0 5px #ff0000;
+  text-shadow: 0 0 5px #00ff00;  // Changed to green glow
   transform: translate(-50%, -50%);
   pointer-events: none;
   white-space: nowrap;
@@ -128,9 +128,9 @@
   }
   
   &::before {
-    content: '⚠';
+    content: '▲';  // Triangle marker for cities
     margin-right: 2px;
-    color: #ff0000;
+    color: #00ff00;
   }
 }
 
@@ -156,15 +156,15 @@
 @keyframes threatPulse {
   0% {
     opacity: 1;
-    text-shadow: 0 0 5px #ff0000;
+    text-shadow: 0 0 5px #00ff00;
   }
   50% {
     opacity: 0.5;
-    text-shadow: 0 0 15px #ff0000;
+    text-shadow: 0 0 15px #00ff00;
   }
   100% {
     opacity: 1;
-    text-shadow: 0 0 5px #ff0000;
+    text-shadow: 0 0 5px #00ff00;
   }
 }
 

@@ -9,6 +9,9 @@
   position: relative;
   overflow: hidden;
   z-index: 1; // Ensure terminal content stays above Matrix background
+  cursor: default; // Prevent text cursor
+  -webkit-user-select: none; // Prevent text selection that might cause cursor issues
+  user-select: none;
   
   &:focus {
     outline: none;
@@ -308,6 +311,9 @@
   flex: 1;
   word-wrap: break-word;
   white-space: pre-wrap;
+  cursor: default; // Prevent text cursor
+  -webkit-user-select: text; // Allow text selection for copying
+  user-select: text;
   
   &.typing {
     border-right: 2px solid var(--crt-green);
@@ -791,6 +797,7 @@
   font-family: inherit;
   font-size: 1rem;
   outline: none;
+  cursor: text; // Explicitly set text cursor for input
   caret-color: var(--crt-green);
   animation: inputCursorBlink 1s infinite;
   
@@ -932,5 +939,41 @@
   51%, 100% { 
     color: var(--crt-yellow); 
     text-shadow: 0 0 5px var(--crt-yellow); 
+  }
+}
+
+// Standalone World Map Display
+.standalone-map {
+  margin: 20px 0;
+  padding: 10px;
+  border: 1px solid var(--crt-green);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  
+  .map-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    app-world-map {
+      max-width: 100%;
+      max-height: 400px;
+      display: block;
+    }
+  }
+  
+  // Add a subtle glow effect
+  box-shadow: 
+    0 0 10px rgba(0, 255, 0, 0.2),
+    inset 0 0 10px rgba(0, 255, 0, 0.1);
+    
+  // Responsive sizing
+  @media (max-width: 768px) {
+    margin: 10px 0;
+    padding: 5px;
+    
+    .map-container app-world-map {
+      max-height: 300px;
+    }
   }
 }

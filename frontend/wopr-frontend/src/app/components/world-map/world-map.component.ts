@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { MissileAnimationState, MissileImpact, MissileTrajectory } from '../../models/missile.models';
 import { MissileAnimationService } from '../../services/missile-animation.service';
-import { MissileAnimationState, MissileTrajectory, MissileImpact } from '../../models/missile.models';
 
 @Component({
   selector: 'app-world-map',
@@ -46,8 +46,8 @@ export class WorldMapComponent implements OnInit, OnDestroy {
   @Input() threats: any[] = [];
   
   private ctx!: CanvasRenderingContext2D;
-  canvasWidth = 1200;  // Made public for template binding
-  canvasHeight = 600;  // Made public for template binding
+  canvasWidth = 1536;  // Updated to match actual world.png dimensions
+  canvasHeight = 1024;  // Updated to match actual world.png dimensions
   private scanLine = 0;
   private scanDirection = 1;
   private animationId?: number;
@@ -93,13 +93,16 @@ export class WorldMapComponent implements OnInit, OnDestroy {
 
     // Set canvas to match image dimensions
     const image = this.imageRef.nativeElement;
-    this.canvasWidth = image.naturalWidth || 1200;
-    this.canvasHeight = image.naturalHeight || 600;
+    this.canvasWidth = image.naturalWidth || 1536;
+    this.canvasHeight = image.naturalHeight || 1024;
     
     // Update canvas size
     const canvas = this.canvasRef.nativeElement;
     canvas.width = this.canvasWidth;
     canvas.height = this.canvasHeight;
+    
+    // Debug log to verify dimensions
+    console.log(`WOPR: Canvas dimensions set to ${this.canvasWidth}x${this.canvasHeight}`);
     
     this.drawGridOverlay();
   }
@@ -310,9 +313,9 @@ export class WorldMapComponent implements OnInit, OnDestroy {
     if (this.missileAnimationState.russianMissilesLaunched > 0) {
       // Draw a few key Russian positions
       const russianSites = [
-        { x: 680, y: 120 }, // Plesetsk
-        { x: 720, y: 200 }, // Kapustin Yar
-        { x: 760, y: 220 }  // Baikonur
+        { x: 680, y: 103 }, // Plesetsk (updated coordinates)
+        { x: 720, y: 192 }, // Kapustin Yar (updated coordinates)
+        { x: 756, y: 215 }  // Baikonur (updated coordinates)
       ];
 
       russianSites.forEach(site => {
@@ -328,9 +331,9 @@ export class WorldMapComponent implements OnInit, OnDestroy {
     
     if (this.missileAnimationState.usaMissilesLaunched > 0) {
       const usaSites = [
-        { x: 120, y: 240 }, // Vandenberg
-        { x: 300, y: 280 }, // Kennedy
-        { x: 200, y: 180 }  // Minot
+        { x: 206, y: 243 }, // Vandenberg (updated coordinates)
+        { x: 319, y: 284 }, // Kennedy (updated coordinates)
+        { x: 300, y: 152 }  // Minot (updated coordinates)
       ];
 
       usaSites.forEach(site => {

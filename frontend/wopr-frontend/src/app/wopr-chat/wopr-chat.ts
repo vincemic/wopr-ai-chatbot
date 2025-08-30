@@ -7,6 +7,7 @@ import { MatrixBackgroundComponent } from '../components/matrix-background/matri
 import { SettingsPanelComponent } from '../components/settings-panel/settings-panel.component';
 import { WorldMapComponent } from '../components/world-map/world-map.component';
 import { LaunchCodeAnimation } from '../models/launch-codes.models';
+import { RUSSIA_TARGETS, USA_TARGETS } from '../models/missile.models';
 import { WoprSettings } from '../models/settings.models';
 import { WoprToolCall } from '../models/wopr-tools.models';
 import { ChatMessage, WoprGameState } from '../models/wopr.models';
@@ -44,6 +45,9 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked, AfterViewI
   // Connection state management
   showConnectionPrompt = true;
   isDialingUp = false;
+  showCityMarkers = true;  // Toggle for showing city markers on map
+  cityThreats: any[] = [];  // City markers data for the map
+  showWorldMap = false;     // Toggle for showing the world map display
   
   // Audio context for terminal beeping sounds
   private audioContext: AudioContext | null = null;
@@ -128,22 +132,7 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
 `;
   
   // Client-side fallback messages for when WOPR AI backend is unavailable
-  // WOPR startup sequence
-  private startupMessages = [
-    'WOPR SYSTEM INITIALIZING...',
-    'ESTABLISHING MODEM CONNECTION...',
-    'LOADING STRATEGIC PROTOCOLS...',
-    'CONNECTING TO NORAD MAINFRAME...',
-    'DEFCON SYSTEMS ONLINE',
-    'WAR OPERATION PLAN RESPONSE - READY',
-    '',
-    'GREETINGS PROFESSOR FALKEN.',
-    '',
-    'SYSTEM COMMANDS AVAILABLE.',
-    'TYPE /HELP FOR COMMAND LIST.',
-    '',
-    'HOW ABOUT A NICE GAME OF CHESS?'
-  ];
+  // Note: startupMessages are now defined inline in playStartupSequence() method
 
   ngOnInit() {
     this.initializeAudio();
@@ -172,6 +161,11 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
     // Check for auto-connect setting
     if (this.settings.autoConnect) {
       this.connectToWopr();
+    }
+    
+    // Initialize city markers if enabled by default
+    if (this.showCityMarkers) {
+      this.initializeCityMarkers();
     }
     
     // Update time every second
@@ -535,9 +529,31 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
   }
 
   private async playStartupSequence() {
-    for (const message of this.startupMessages) {
+    // System initialization messages
+    const systemMessages = [
+      'WOPR SYSTEM INITIALIZING...',
+      'CONNECTING TO NORAD MAINFRAME...',
+      'DEFCON SYSTEMS ONLINE',
+      '',
+      'TYPE /HELP FOR COMMAND LIST.',
+      ''
+    ];
+    
+    // WOPR greeting messages
+    const woprMessages = [
+      'GREETINGS PROFESSOR FALKEN.'
+    ];
+    
+    // Play system messages first
+    for (const message of systemMessages) {
       await this.typeMessage(message, 'system');
       await this.delay(message === '' ? 500 : 1000);
+    }
+    
+    // Then play WOPR greeting
+    for (const message of woprMessages) {
+      await this.typeMessage(message, 'assistant');
+      await this.delay(1000);
     }
   }
 
@@ -570,8 +586,8 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
       await this.delay(this.settings.terminalSpeed); // Typing speed from settings
     }
     
-    // Automatically speak WOPR messages (system and assistant messages) if TTS is enabled
-    if (enableTTS && (role === 'assistant' || role === 'system')) {
+    // Automatically speak only WOPR messages (assistant role) if TTS is enabled
+    if (enableTTS && role === 'assistant') {
       // Small delay to let the typing animation complete
       await this.delay(200);
       this.speakMessage(content);
@@ -637,8 +653,8 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
         }
       }
 
-      // Type the WOPR response
-      await this.typeMessage(response);
+      // Type the WOPR response - explicitly set as assistant role to ensure it shows as "WOPR:"
+      await this.typeMessage(response, 'assistant');
 
     } catch (error: any) {
       console.error('Chat error:', error);
@@ -654,7 +670,8 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
         }
       }
 
-      await this.typeMessage(errorMessage);
+      // OpenAI error messages should also appear as WOPR responses
+      await this.typeMessage(errorMessage, 'assistant');
     } finally {
       this.isTyping = false;
       // Return focus to input after typing is complete
@@ -674,13 +691,13 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
     this.gameState = null;
     await this.addSystemMessage('WOPR SYSTEMS RESET. ALL GAME STATES CLEARED.');
     await this.addSystemMessage('TYPE /HELP FOR COMMAND LIST.');
-    await this.addSystemMessage('SHALL WE PLAY A GAME?');
+    await this.typeMessage('SHALL WE PLAY A GAME?', 'assistant'); // WOPR greeting, not system message
     // Focus input after reset messages
     this.focusInput();
   }
 
   private async addSystemMessage(content: string): Promise<void> {
-    // Use typeMessage for consistent beeping behavior
+    // Use 'system' role for command outputs and system messages - no TTS
     await this.typeMessage(content, 'system');
   }
 
@@ -877,6 +894,54 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
     this.focusInput();
   }
 
+  initializeCityMarkers() {
+    // Generate city threat markers from missile targets
+    this.cityThreats = [
+      // USA Cities
+      ...USA_TARGETS.map(city => ({
+        x: city.x,
+        y: city.y, 
+        label: city.name,
+        active: true
+      })),
+      // Russian Cities  
+      ...RUSSIA_TARGETS.map(city => ({
+        x: city.x,
+        y: city.y,
+        label: city.name,
+        active: true
+      }))
+    ];
+  }
+
+  async toggleCityMarkers() {
+    this.showCityMarkers = !this.showCityMarkers;
+    
+    if (this.showCityMarkers) {
+      this.initializeCityMarkers();
+    } else {
+      this.cityThreats = [];
+    }
+    
+    // Announce the change
+    const status = this.showCityMarkers ? 'ENABLED' : 'DISABLED';
+    await this.addSystemMessage(`CITY MARKERS ${status}`);
+    
+    // Return focus to input
+    this.focusInput();
+  }
+
+  async toggleWorldMap() {
+    this.showWorldMap = !this.showWorldMap;
+    
+    // Announce the change
+    const status = this.showWorldMap ? 'DISPLAYED' : 'HIDDEN';
+    await this.addSystemMessage(`WORLD MAP ${status}`);
+    
+    // Return focus to input
+    this.focusInput();
+  }
+
   // Text-to-speech functionality
   speakMessage(text: string) {
     if (!this.textToSpeechEnabled || !('speechSynthesis' in window) || !text.trim()) {
@@ -1002,6 +1067,16 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
       case '/missiles':
         await this.testMissileAnimation();
         break;
+
+      case '/cities':
+      case '/markers':
+        await this.toggleCityMarkers();
+        break;
+
+      case '/map':
+      case '/worldmap':
+        await this.toggleWorldMap();
+        break;
       
       default:
         await this.typeMessage(`UNKNOWN COMMAND: ${command}
@@ -1031,30 +1106,13 @@ BASIC COMMANDS:
 /test-dialup  - Test dial-up modem sound
 /launchcodes, /crack - Crack NORAD launch codes (authentic animation)
 /missiles     - Test missile animation (Russia vs USA)
+/cities, /markers - Toggle city markers on world map
+/map, /worldmap - Toggle world map display
 
 SETTINGS MANAGEMENT:
 /config       - Open configuration panel
 /export-settings - Export settings to JSON file
-/reset-settings  - Reset all settings to defaults
-
-WOPR INTERACTIVE CAPABILITIES (requires API key):
-- Ask me to run system diagnostics
-- Simulate military scenarios and war games
-- Access NORAD facility databases
-- Calculate missile trajectories
-- Modify DEFCON levels
-- Crack launch codes with realistic animation
-- Engage in strategic conversations about games
-
-EXAMPLE REQUESTS:
-"Run a system diagnostic on all components"
-"Simulate a cyber attack scenario"
-"Access Cheyenne Mountain status"
-"Calculate trajectory from USSR to Washington"
-"Set DEFCON to level 2 due to increased threats"
-"Crack the launch codes for nuclear weapons"
-
-FUNCTION CALLING SYSTEM ONLINE WITH API KEY CONFIGURED.`;
+/reset-settings  - Reset all settings to defaults`;
 
     await this.typeMessage(helpText, 'system', false);
   }
@@ -1123,45 +1181,45 @@ ${this.hasOpenAIApiKey() ?
 
   // Launch code cracking animation method
   async crackLaunchCodes() {
-    await this.typeMessage('INITIATING LAUNCH CODE SEQUENCE...', 'system');
-    await this.typeMessage('ACCESSING NORAD MAINFRAME...', 'system');
-    await this.typeMessage('', 'system'); // Empty line for spacing
+    await this.typeMessage('INITIATING LAUNCH CODE SEQUENCE...', 'assistant');
+    await this.typeMessage('ACCESSING NORAD MAINFRAME...', 'assistant');
+    await this.typeMessage('', 'assistant'); // Empty line for spacing
     
     // Start the animation
     const result = await this.launchCodeService.startLaunchCodeAnimation();
     
     if (result.success && result.finalCode) {
-      await this.typeMessage(`LAUNCH CODE CRACKED: ${result.finalCode}`, 'system');
-      await this.typeMessage('WARNING: DEFCON 1 ALERT TRIGGERED', 'system');
-      await this.typeMessage('GLOBAL THERMONUCLEAR WAR SIMULATION READY', 'system');
-      await this.typeMessage('', 'system'); // Empty line for spacing
+      await this.typeMessage(`LAUNCH CODE CRACKED: ${result.finalCode}`, 'assistant');
+      await this.typeMessage('WARNING: DEFCON 1 ALERT TRIGGERED', 'assistant');
+      await this.typeMessage('GLOBAL THERMONUCLEAR WAR SIMULATION READY', 'assistant');
+      await this.typeMessage('', 'assistant'); // Empty line for spacing
       
       // Start missile animation sequence
-      await this.typeMessage('INITIATING MISSILE LAUNCH SEQUENCE...', 'system');
-      await this.typeMessage('RUSSIA: LAUNCHING INTERCONTINENTAL BALLISTIC MISSILES', 'system');
+      await this.typeMessage('INITIATING MISSILE LAUNCH SEQUENCE...', 'assistant');
+      await this.typeMessage('RUSSIA: LAUNCHING INTERCONTINENTAL BALLISTIC MISSILES', 'assistant');
       
       // Start the missile animation
       this.missileAnimationService.startMissileAnimation();
       
       // Wait a moment for Russian missiles to launch
       await this.delay(6000);
-      await this.typeMessage('USA: RETALIATORY STRIKE AUTHORIZED', 'system');
-      await this.typeMessage('NUCLEAR EXCHANGE IN PROGRESS...', 'system');
+      await this.typeMessage('USA: RETALIATORY STRIKE AUTHORIZED', 'assistant');
+      await this.typeMessage('NUCLEAR EXCHANGE IN PROGRESS...', 'assistant');
       
       // Wait for animation to complete
       await this.delay(25000);
-      await this.typeMessage('', 'system'); // Empty line
-      await this.typeMessage('GLOBAL NUCLEAR EXCHANGE COMPLETE', 'system');
-      await this.typeMessage('CASUALTIES: ESTIMATED 200 MILLION+', 'system');
-      await this.typeMessage('RADIATION LEVELS: CRITICAL', 'system');
+      await this.typeMessage('', 'assistant'); // Empty line
+      await this.typeMessage('GLOBAL NUCLEAR EXCHANGE COMPLETE', 'assistant');
+      await this.typeMessage('CASUALTIES: ESTIMATED 200 MILLION+', 'assistant');
+      await this.typeMessage('RADIATION LEVELS: CRITICAL', 'assistant');
       await this.typeMessage('WINNER: NONE', 'system');
       await this.typeMessage('', 'system'); // Empty line
-      await this.typeMessage('STRANGE GAME.', 'system');
-      await this.typeMessage('THE ONLY WINNING MOVE IS NOT TO PLAY.', 'system');
+      await this.typeMessage('STRANGE GAME.', 'assistant');
+      await this.typeMessage('THE ONLY WINNING MOVE IS NOT TO PLAY.', 'assistant');
       
     } else {
-      await this.typeMessage('LAUNCH CODE SEQUENCE FAILED', 'system');
-      await this.typeMessage('ACCESS DENIED: INSUFFICIENT CLEARANCE', 'system');
+      await this.typeMessage('LAUNCH CODE SEQUENCE FAILED', 'assistant');
+      await this.typeMessage('ACCESS DENIED: INSUFFICIENT CLEARANCE', 'assistant');
     }
     
     setTimeout(() => this.focusInput(), 1000);
@@ -1170,19 +1228,19 @@ ${this.hasOpenAIApiKey() ?
   // Test missile animation method  
   async testMissileAnimation() {
     await this.typeMessage('TESTING MISSILE ANIMATION SYSTEM...', 'system');
-    await this.typeMessage('INITIATING SIMULATED NUCLEAR EXCHANGE...', 'system');
-    await this.typeMessage('', 'system'); // Empty line for spacing
+    await this.typeMessage('INITIATING SIMULATED NUCLEAR EXCHANGE...', 'assistant');
+    await this.typeMessage('', 'assistant'); // Empty line for spacing
     
     // Start the missile animation
     this.missileAnimationService.startMissileAnimation();
     
-    await this.typeMessage('RUSSIA: LAUNCHING 6 ICBM MISSILES', 'system');
+    await this.typeMessage('RUSSIA: LAUNCHING 6 ICBM MISSILES', 'assistant');
     await this.delay(6000);
-    await this.typeMessage('USA: LAUNCHING 6 RETALIATORY MISSILES', 'system');
+    await this.typeMessage('USA: LAUNCHING 6 RETALIATORY MISSILES', 'assistant');
     
     // Wait for animation to complete
     await this.delay(25000);
-    await this.typeMessage('', 'system'); // Empty line
+    await this.typeMessage('', 'assistant'); // Empty line
     await this.typeMessage('MISSILE ANIMATION TEST COMPLETE', 'system');
     
     setTimeout(() => this.focusInput(), 1000);
