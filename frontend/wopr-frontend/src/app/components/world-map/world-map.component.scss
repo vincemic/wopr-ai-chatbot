@@ -4,6 +4,8 @@
   border: 2px solid #00ff00;
   border-radius: 4px;
   background: #000;
+  max-width: 1200px; // Optimized for new resolution
+  width: 100%;
   box-shadow: 
     0 0 10px #00ff00,
     inset 0 0 10px rgba(0, 255, 0, 0.1);
@@ -13,12 +15,74 @@
   }
 }
 
-.world-map-canvas {
+.map-header {
+  color: #ff0000;
+  font-family: 'Courier Prime', 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  padding: 5px;
+  background: rgba(0, 0, 0, 0.8);
+  border-bottom: 1px solid #00ff00;
+}
+
+.world-map-display {
+  position: relative;
+  width: 100%;
+  height: auto;
+}
+
+.world-map-image {
   display: block;
+  width: 100%;
+  height: auto;
   background: #000;
-  cursor: crosshair;
   
-  // CRT scanline effect
+  // Apply bright green filter for transparent PNG line art
+  filter: 
+    grayscale(1)           // Convert to grayscale first
+    sepia(1)               // Apply sepia base
+    hue-rotate(90deg)      // Shift to green spectrum
+    saturate(3)            // High saturation for vivid green
+    brightness(1.2)        // Slight brightness boost
+    contrast(1.8);         // Good contrast for sharp lines
+    
+  // Alternative: Direct green colorization (uncomment if above doesn't work well)
+  // filter: 
+  //   grayscale(1)         // Convert to grayscale first
+  //   sepia(1)             // Apply sepia
+  //   hue-rotate(90deg)    // Shift to green
+  //   saturate(5)          // High saturation
+  //   brightness(1.5)      // Bright green
+  //   contrast(2);         // Sharp contrast
+  
+  // For transparent PNGs, you can also try this approach (uncomment to test):
+  // background: transparent;
+  // filter: none;
+  // -webkit-mask: url('assets/images/world.png') no-repeat center/contain;
+  // mask: url('assets/images/world.png') no-repeat center/contain;
+  // background: #00ff00;   // Pure bright green
+    
+  // Make it look more like wireframe
+  mix-blend-mode: screen;
+  
+  // Crisp pixel rendering
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+.world-map-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+  
+  // Enhanced CRT scanline effect for overlay
   &::after {
     content: '';
     position: absolute;
@@ -31,9 +95,10 @@
       0deg,
       transparent,
       transparent 1px,
-      rgba(0, 255, 0, 0.03) 1px,
-      rgba(0, 255, 0, 0.03) 2px
+      rgba(0, 255, 0, 0.04) 1px,
+      rgba(0, 255, 0, 0.04) 2px
     );
+    animation: scanlines 3s linear infinite;
   }
 }
 
@@ -81,6 +146,11 @@
       0 0 20px #00ff00,
       inset 0 0 20px rgba(0, 255, 0, 0.3);
   }
+}
+
+@keyframes scanlines {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(4px); }
 }
 
 @keyframes threatPulse {
