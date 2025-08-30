@@ -88,9 +88,15 @@
         <span class="animation-title">CRACKING LAUNCH AUTHORIZATION CODES...</span>
       </div>
       
-      <!-- Split layout for animation details and world map -->
-      <div class="cracking-layout">
-        <div class="cracking-details">
+      <!-- Full-screen map with centered code overlay -->
+      <div class="cracking-fullscreen">
+        <!-- World Map Display (full area) -->
+        <div class="world-map-fullscreen">
+          <app-world-map></app-world-map>
+        </div>
+        
+        <!-- Centered code overlay -->
+        <div class="code-overlay">
           <div class="animation-progress">
             <div class="progress-bar">
               <div class="progress-fill" [style.width.%]="((launchCodeAnimation?.currentAttempt || 0) / (launchCodeAnimation?.totalAttempts || 1)) * 100"></div>
@@ -105,27 +111,10 @@
             </div>
           </div>
           
-          <div class="animation-codes">
-            <div class="codes-label">RECENT ATTEMPTS:</div>
-            <div *ngFor="let attempt of launchCodeAnimation?.codes?.slice(-4)" 
-                 class="code-attempt" 
-                 [class.success]="attempt.success"
-                 [class.failure]="!attempt.success">
-              <span class="code-text">{{ attempt.code }}</span>
-              <span class="code-status">{{ attempt.success ? '[✓ SUCCESS]' : '[✗ FAILED]' }}</span>
-            </div>
-          </div>
-          
           <div class="animation-status" *ngIf="launchCodeAnimation?.estimatedTimeRemaining">
             <span class="eta-label">TIME REMAINING:</span> 
             <span class="eta-value">{{ getTimeRemaining() }}s</span>
           </div>
-        </div>
-        
-        <!-- World Map Display -->
-        <div class="world-map-section">
-          <div class="map-header">GLOBAL THREAT MATRIX</div>
-          <app-world-map></app-world-map>
         </div>
       </div>
     </div>

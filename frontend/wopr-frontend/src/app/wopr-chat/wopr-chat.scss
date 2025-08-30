@@ -422,66 +422,7 @@
     }
   }
   
-  .animation-codes {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    margin-bottom: 10px;
-    font-family: 'Courier Prime', monospace;
-    
-    .codes-label {
-      color: var(--crt-yellow);
-      font-size: 0.8em;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-    
-    .code-attempt {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.9em;
-      padding: 4px 8px;
-      border-radius: 3px;
-      transition: all 0.3s ease;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid transparent;
-      
-      .code-text {
-        font-family: 'Courier Prime', monospace;
-        letter-spacing: 1px;
-        font-weight: bold;
-      }
-      
-      .code-status {
-        font-size: 0.8em;
-        margin-left: 10px;
-      }
-      
-      &.success {
-        color: var(--crt-green);
-        background: rgba(0, 255, 0, 0.1);
-        border-color: var(--crt-green);
-        text-shadow: 0 0 3px var(--crt-green);
-        
-        .code-status {
-          color: var(--crt-green);
-        }
-      }
-      
-      &.failure {
-        color: var(--crt-red);
-        background: rgba(255, 0, 0, 0.05);
-        border-color: var(--crt-dark-red);
-        opacity: 0.7;
-        
-        .code-status {
-          color: var(--crt-red);
-        }
-      }
-    }
-  }
-  
+  // Status display at bottom of overlay
   .animation-status {
     display: flex;
     justify-content: center;
@@ -505,41 +446,140 @@
     }
   }
 
-  // New split layout for cracking animation and world map
-  .cracking-layout {
-    display: flex;
-    gap: 20px;
+  // Fullscreen map layout with centered code overlay
+  .cracking-fullscreen {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    background: var(--crt-black);
+    border: 1px solid var(--crt-green);
+    border-radius: 4px;
+    overflow: hidden;
     margin-top: 15px;
+  }
+
+  .world-map-fullscreen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .code-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    background: rgba(0, 0, 0, 0.85);
+    border: 1px solid var(--crt-green);
+    border-radius: 8px;
+    padding: 20px 30px;
+    min-width: 300px;
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+  }
+
+  .animation-progress {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+
+    .progress-bar {
+      flex: 1;
+      height: 12px;
+      background: var(--crt-dark-gray);
+      border: 1px solid var(--crt-green);
+      position: relative;
+      overflow: hidden;
+      border-radius: 2px;
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--crt-red), var(--crt-orange));
+        transition: width 0.3s ease-in-out;
+        animation: progressGlow 1.5s ease-in-out infinite;
+      }
+    }
+
+    .progress-text {
+      color: var(--crt-green);
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.9em;
+      white-space: nowrap;
+      min-width: 80px;
+      text-align: center;
+    }
+  }
+
+  .current-code-display {
+    text-align: center;
     
-    @media (max-width: 768px) {
-      flex-direction: column;
+    .code-label {
+      color: var(--crt-red);
+      font-size: 0.8em;
+      margin-bottom: 8px;
+      font-weight: bold;
+      text-shadow: 0 0 2px var(--crt-red);
+      letter-spacing: 0.1em;
+    }
+    
+    .current-code {
+      font-family: 'Courier Prime', monospace;
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--crt-green);
+      letter-spacing: 3px;
+      text-shadow: 0 0 10px var(--crt-green);
+      animation: codeBlink 0.5s ease-in-out infinite;
+      background: rgba(0, 255, 0, 0.1);
+      padding: 12px 20px;
+      border-radius: 4px;
+      border: 1px solid var(--crt-green);
+    }
+  }
+
+  .animation-status {
+    text-align: center;
+    color: var(--crt-green);
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.9rem;
+    
+    .eta-label {
+      color: var(--crt-yellow);
+      margin-right: 8px;
+    }
+    
+    .eta-value {
+      color: var(--crt-green);
+      font-weight: 600;
+      animation: codeBlink 1s infinite;
+    }
+  }
+
+  // Mobile responsive adjustments
+  @media (max-width: 768px) {
+    .cracking-fullscreen {
+      height: 400px;
+    }
+
+    .code-overlay {
+      padding: 15px 20px;
+      min-width: 280px;
       gap: 15px;
     }
-    
-    .cracking-details {
-      flex: 1;
-      min-width: 0; // Allows flex shrinking
-    }
-    
-    .world-map-section {
-      flex: 1;
-      min-width: 300px;
-      
-      @media (max-width: 768px) {
-        min-width: 100%;
-      }
-      
-      .map-header {
-        color: var(--crt-red);
-        font-weight: bold;
-        text-align: center;
-        margin-bottom: 10px;
-        font-size: 0.9em;
-        text-shadow: 0 0 3px var(--crt-red);
-        letter-spacing: 1px;
-        padding: 5px;
-        border-bottom: 1px solid var(--crt-dark-red);
-      }
+
+    .current-code-display .current-code {
+      font-size: 1.4rem;
+      letter-spacing: 2px;
     }
   }
 }

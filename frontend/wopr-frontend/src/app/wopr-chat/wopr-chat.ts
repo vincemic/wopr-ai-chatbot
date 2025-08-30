@@ -2,12 +2,12 @@ import { CommonModule } from '@angular/common';
 import { AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
-import { ChatMessage, WoprGameState } from '../models/wopr.models';
-import { WoprToolsService } from '../services/wopr-tools.service';
-import { WoprToolCall, WoprToolResult } from '../models/wopr-tools.models';
-import { LaunchCodeService } from '../services/launch-code.service';
-import { LaunchCodeAnimation } from '../models/launch-codes.models';
 import { WorldMapComponent } from '../components/world-map/world-map.component';
+import { LaunchCodeAnimation } from '../models/launch-codes.models';
+import { WoprToolCall } from '../models/wopr-tools.models';
+import { ChatMessage, WoprGameState } from '../models/wopr.models';
+import { LaunchCodeService } from '../services/launch-code.service';
+import { WoprToolsService } from '../services/wopr-tools.service';
 
 @Component({
   selector: 'app-wopr-chat',

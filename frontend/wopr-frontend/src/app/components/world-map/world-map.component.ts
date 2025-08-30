@@ -1,5 +1,5 @@
-import { Component, ElementRef, ViewChild, OnInit, OnDestroy, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-world-map',
