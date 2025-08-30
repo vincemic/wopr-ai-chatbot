@@ -51,6 +51,19 @@
             Computer Beeps (Launch Codes)
           </label>
         </div>
+        
+        <div class="setting-item">
+          <label>Speech Voice:</label>
+          <select class="voice-select" 
+                  title="Select speech synthesis voice"
+                  [value]="settings.speechVoice"
+                  (change)="onVoiceChange($any($event.target).value)">
+            <option value="auto">Auto-detect Best Voice</option>
+            <option *ngFor="let voice of getAvailableVoices()" [value]="voice.name">
+              {{ voice.name }} ({{ voice.lang }})
+            </option>
+          </select>
+        </div>
       </div>
 
       <!-- API Configuration -->

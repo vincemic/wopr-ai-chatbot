@@ -855,18 +855,10 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
     utterance.pitch = 0.4;       // Lower pitch, more robotic
     utterance.volume = 0.8;      // Clear volume
     
-    // Try to find a more robotic/synthetic voice if available
-    const voices = speechSynthesis.getVoices();
-    const roboticVoice = voices.find(voice => 
-      voice.name.toLowerCase().includes('microsoft') ||
-      voice.name.toLowerCase().includes('robotic') ||
-      voice.name.toLowerCase().includes('computer') ||
-      voice.name.toLowerCase().includes('zira') ||
-      voice.name.toLowerCase().includes('david')
-    );
-    
-    if (roboticVoice) {
-      utterance.voice = roboticVoice;
+    // Use voice selection from settings
+    const selectedVoice = this.settingsService.getBestVoiceForWopr();
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
     }
     
     speechSynthesis.speak(utterance);

@@ -29,6 +29,7 @@
     "csharp.debug.console": "integratedTerminal",
     "csharp.debug.stopAtEntry": false,
     "terminal.integrated.fontSize": 14,
+    "terminal.integrated.cwd": "${workspaceFolder}/frontend/wopr-frontend",
     "workbench.colorCustomizations": {
         "terminal.background": "#001100",
         "terminal.foreground": "#00ff41",

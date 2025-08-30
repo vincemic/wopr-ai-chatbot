@@ -18,7 +18,16 @@
                 "showReuseMessage": true,
                 "clear": false
             },
-            "problemMatcher": ["$tsc", "$eslint-stylish"],
+            "problemMatcher": [
+                {
+                    "base": "$tsc-watch",
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": "^.*Application bundle generation.*$",
+                        "endsPattern": "^.*Compiled successfully\\.$|^.*webpack compiled.*$|^.*✓ Compiled successfully\\.$"
+                    }
+                }
+            ],
             "isBackground": true,
             "runOptions": {
                 "instanceLimit": 1
@@ -95,7 +104,8 @@
                 "reveal": "always",
                 "focus": false,
                 "panel": "shared"
-            }
+            },
+            "problemMatcher": []
         },
         {
             "label": "test-playwright",
@@ -111,7 +121,8 @@
                 "reveal": "always",
                 "focus": false,
                 "panel": "shared"
-            }
+            },
+            "problemMatcher": []
         },
         {
             "label": "test-playwright-ui",
@@ -127,7 +138,8 @@
                 "reveal": "always",
                 "focus": false,
                 "panel": "shared"
-            }
+            },
+            "problemMatcher": []
         },
         {
             "label": "install-playwright",
@@ -143,7 +155,8 @@
                 "reveal": "always",
                 "focus": false,
                 "panel": "shared"
-            }
+            },
+            "problemMatcher": []
         }
     ]
 }

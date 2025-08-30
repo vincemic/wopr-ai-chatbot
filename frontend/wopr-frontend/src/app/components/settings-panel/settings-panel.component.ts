@@ -65,6 +65,35 @@ export class SettingsPanelComponent implements OnInit, OnDestroy {
     this.settingsService.toggleTensionMusic();
   }
 
+  // Voice Settings
+  onVoiceChange(voiceName: string) {
+    this.settingsService.setSpeechVoice(voiceName);
+    this.testVoice(voiceName);
+  }
+
+  getAvailableVoices(): SpeechSynthesisVoice[] {
+    return this.settingsService.getAvailableVoices();
+  }
+
+  private testVoice(voiceName: string) {
+    // Test the selected voice with a short WOPR phrase
+    if ('speechSynthesis' in window && this.settings.textToSpeechEnabled) {
+      speechSynthesis.cancel(); // Stop any current speech
+      
+      const utterance = new SpeechSynthesisUtterance('VOICE TEST ACTIVE');
+      utterance.rate = 0.7;
+      utterance.pitch = 0.4;
+      utterance.volume = 0.8;
+      
+      const selectedVoice = this.settingsService.getBestVoiceForWopr();
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
+      
+      speechSynthesis.speak(utterance);
+    }
+  }
+
   // Display Settings
   onThemeChange(theme: string) {
     this.settingsService.setTheme(theme as any);

@@ -4,6 +4,7 @@ export interface WoprSettings {
   beepEnabled: boolean;
   dialupEnabled: boolean;
   tensionMusicEnabled: boolean;
+  speechVoice: string; // Voice name for speech synthesis
   
   // API Configuration
   openaiApiKey: string | null;
@@ -64,6 +65,7 @@ export const DEFAULT_SETTINGS: WoprSettings = {
   beepEnabled: true,
   dialupEnabled: true,
   tensionMusicEnabled: true,
+  speechVoice: 'auto', // Auto-detect best voice
   
   // API Configuration
   openaiApiKey: null,

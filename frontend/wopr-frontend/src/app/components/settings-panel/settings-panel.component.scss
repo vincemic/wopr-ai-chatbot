@@ -248,6 +248,29 @@
   }
 }
 
+.voice-select {
+  background: rgba(0, 255, 0, 0.1);
+  border: 1px solid var(--crt-green);
+  color: var(--crt-green);
+  padding: 8px 12px;
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 8px;
+  min-width: 250px;
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+  }
+  
+  option {
+    background: var(--crt-black);
+    color: var(--crt-green);
+  }
+}
+
 .speed-slider {
   background: transparent;
   margin: 8px 10px 8px 0;

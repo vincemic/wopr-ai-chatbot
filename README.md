@@ -100,7 +100,7 @@ ai-wopr/
 - **Multiple Visual Themes** including Classic Green, Amber, Blue, and Matrix with real-time switching
 - **Authentic CRT terminal styling** with phosphor glow, scan lines, and dot-matrix effects
 - **Real-time chat interface** with WOPR computer personality and character-by-character typing
-- **Text-to-Speech** functionality with robotic voice configuration
+- **Text-to-Speech** functionality with robotic voice configuration and voice selection
 - **Terminal beeping sounds** using Web Audio API (800Hz square wave)
 - **Launch Code Computer Beeps** with authentic 1980s computer sounds during cracking sequences
 - **Intelligent Fallback System** with helpful guidance when no API key is configured
@@ -156,7 +156,7 @@ This project uses a **frontend-only architecture** with direct OpenAI Chat API i
 - **localStorage API**: Persistent settings storage with JSON serialization
 - **RxJS**: Reactive programming for settings management and real-time updates
 - **SCSS**: Advanced styling with CSS custom properties and theme system
-- **Web Speech API**: Browser-native text-to-speech functionality
+- **Web Speech API**: Browser-native text-to-speech with voice selection functionality
 - **HttpClient**: Reactive programming with RxJS observables
 - **Playwright**: End-to-end testing framework
 
@@ -252,6 +252,7 @@ The WOPR interface includes a comprehensive settings system accessible via the `
 #### Audio Settings
 
 - **Text-to-Speech**: Toggle computer voice for WOPR responses
+- **Speech Voice**: Select from available system voices for optimal WOPR experience
 - **Terminal Beeping**: Enable/disable character-by-character beeping sounds
 - **Launch Code Beeps**: Control computer beeps during launch code sequences
 - **Dial-up Sounds**: Toggle connection modem sound effects
@@ -407,7 +408,7 @@ This project includes automated deployment:
 
 - Use the `/config` command to access the visual settings panel
 - Choose from multiple themes: Classic Green, Amber, Blue, Matrix
-- Configure audio preferences including TTS, beeping, and dial-up sounds
+- Configure audio preferences including TTS, voice selection, beeping, and dial-up sounds
 - Adjust AI behavior with temperature and token limits
 - Export/import settings for backup and sharing
 
@@ -431,9 +432,10 @@ The WOPR interface delivers an authentic 1983 computer experience through sophis
 ### Text-to-Speech System
 
 - **Browser Speech Synthesis API** integration with robotic voice configuration
+- **Voice Selection**: Choose from available system voices for optimal WOPR experience
 - **Automatic message reading** for all WOPR responses
 - **Individual message replay** with dedicated speak buttons
-- **Voice settings optimized** for computer-like delivery (rate: 0.8, pitch: 0.3)
+- **Voice settings optimized** for computer-like delivery (rate: 0.7, pitch: 0.4)
 - **Toggle controls** for enabling/disabling TTS functionality
 
 ### Terminal Beeping Sounds

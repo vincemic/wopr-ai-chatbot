@@ -401,6 +401,53 @@ export class SettingsService {
   }
 
   /**
+   * Speech voice management
+   */
+  public setSpeechVoice(voiceName: string): void {
+    this.setSetting('speechVoice', voiceName);
+  }
+
+  public getSpeechVoice(): string {
+    return this.currentSettings.speechVoice;
+  }
+
+  public getAvailableVoices(): SpeechSynthesisVoice[] {
+    if ('speechSynthesis' in window) {
+      return speechSynthesis.getVoices();
+    }
+    return [];
+  }
+
+  public getBestVoiceForWopr(): SpeechSynthesisVoice | null {
+    const voices = this.getAvailableVoices();
+    if (voices.length === 0) return null;
+
+    // Current setting
+    const currentVoice = this.getSpeechVoice();
+    
+    // If user has selected a specific voice, try to find it
+    if (currentVoice !== 'auto') {
+      const selectedVoice = voices.find(v => v.name === currentVoice);
+      if (selectedVoice) return selectedVoice;
+    }
+
+    // Auto-detect best voice for WOPR (robotic/computer-like)
+    const roboticVoice = voices.find(voice => 
+      voice.name.toLowerCase().includes('microsoft') ||
+      voice.name.toLowerCase().includes('robotic') ||
+      voice.name.toLowerCase().includes('computer') ||
+      voice.name.toLowerCase().includes('zira') ||
+      voice.name.toLowerCase().includes('david') ||
+      voice.name.toLowerCase().includes('mark')
+    );
+    
+    if (roboticVoice) return roboticVoice;
+    
+    // Fallback to first available voice
+    return voices[0] || null;
+  }
+
+  /**
    * System settings management
    */
   public toggleAutoConnect(): boolean {
