@@ -3,9 +3,9 @@ import { AfterViewChecked, AfterViewInit, Component, ElementRef, OnDestroy, OnIn
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { MatrixBackgroundComponent } from '../components/matrix-background/matrix-background.component';
 import { SettingsPanelComponent } from '../components/settings-panel/settings-panel.component';
 import { WorldMapComponent } from '../components/world-map/world-map.component';
-import { MatrixBackgroundComponent } from '../components/matrix-background/matrix-background.component';
 import { LaunchCodeAnimation } from '../models/launch-codes.models';
 import { WoprSettings } from '../models/settings.models';
 import { WoprToolCall } from '../models/wopr-tools.models';
