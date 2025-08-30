@@ -24,6 +24,9 @@ Experience the authentic 1983 War Games WOPR computer interface directly in your
 **Chat Interface with WOPR**
 ![WOPR Chat Interface](wopr-chat-screenshot.png)
 
+**Matrix Theme with Falling Symbols**
+![WOPR Matrix Theme](wopr-matrix-theme-screenshot.png)
+
 > **Note**: For full OpenAI integration, follow the local setup instructions below to configure your API key.
 
 ## Recent Enhancements

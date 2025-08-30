@@ -29,7 +29,14 @@
   <!-- Main WOPR Interface -->
   <div class="wopr-interface" *ngIf="!showConnectionPrompt && !isDialingUp">
   <!-- Header -->
-  <div class="terminal-header">
+  <div class="terminal-header" [class.matrix-theme]="isMatrixTheme()">
+    <!-- Matrix Background in Header (only shown for Matrix themes) -->
+    <app-matrix-background 
+      class="header-matrix-bg"
+      [isVisible]="isMatrixTheme()" 
+      [theme]="getCurrentTheme()">
+    </app-matrix-background>
+    
     <div class="header-left">
       <span class="wopr-title">W.O.P.R.</span>
       <span class="subtitle">WAR OPERATION PLAN RESPONSE</span>

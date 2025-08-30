@@ -8,6 +8,7 @@
   font-family: 'Courier Prime', 'Courier New', monospace;
   position: relative;
   overflow: hidden;
+  z-index: 1; // Ensure terminal content stays above Matrix background
   
   &:focus {
     outline: none;
@@ -172,6 +173,8 @@
   width: 100vw;
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 2; // Above the Matrix background
 }
 
 .terminal-header {
@@ -181,11 +184,41 @@
   padding: 10px 20px;
   border-bottom: 1px solid var(--crt-dark-green);
   background: var(--crt-dark-gray);
+  position: relative; // Allow positioning of child elements
+  overflow: hidden; // Clip Matrix background to header bounds
+  z-index: 1; // Ensure header content stays above Matrix background
 }
+
+// Matrix background styling when in header
+.header-matrix-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1; // Behind header text but above header background
+}
+
+// Darken header background when Matrix theme is active
+.terminal-header.matrix-theme {
+  background: rgba(0, 0, 0, 0.7); // Darker background for better Matrix visibility
+}
+
+// Remove the :has() selector as it's not widely supported
+//.terminal-header:has(.header-matrix-bg) {
+//  background: rgba(0, 0, 0, 0.7);
+//}
 
 .header-left {
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 2; // Above Matrix background
+}
+
+.header-right {
+  position: relative;
+  z-index: 2; // Above Matrix background
 }
 
 .wopr-title {

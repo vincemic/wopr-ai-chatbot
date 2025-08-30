@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { SettingsPanelComponent } from '../components/settings-panel/settings-panel.component';
 import { WorldMapComponent } from '../components/world-map/world-map.component';
+import { MatrixBackgroundComponent } from '../components/matrix-background/matrix-background.component';
 import { LaunchCodeAnimation } from '../models/launch-codes.models';
 import { WoprSettings } from '../models/settings.models';
 import { WoprToolCall } from '../models/wopr-tools.models';
@@ -15,14 +16,15 @@ import { WoprToolsService } from '../services/wopr-tools.service';
 
 @Component({
   selector: 'app-wopr-chat',
-  imports: [CommonModule, FormsModule, WorldMapComponent, SettingsPanelComponent],
+  imports: [CommonModule, FormsModule, WorldMapComponent, SettingsPanelComponent, MatrixBackgroundComponent],
   templateUrl: './wopr-chat.html',
   styleUrl: './wopr-chat.scss'
 })
-export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
+export class WoprChat implements OnInit, OnDestroy, AfterViewChecked, AfterViewInit {
   @ViewChild('chatContainer') chatContainer!: ElementRef;
   @ViewChild('messageInput') messageInput!: ElementRef;
   @ViewChild(SettingsPanelComponent) settingsPanel!: SettingsPanelComponent;
+  @ViewChild(MatrixBackgroundComponent) matrixBackground!: MatrixBackgroundComponent;
 
   private destroy$ = new Subject<void>();
   
@@ -65,6 +67,20 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
     // Get initial settings
     this.settings = this.settingsService.getSettings();
     this.updateFromSettings();
+  }
+
+  /**
+   * Check if current theme is a Matrix-style theme
+   */
+  public isMatrixTheme(): boolean {
+    return this.settings.theme === 'green' || this.settings.theme === 'blue';
+  }
+
+  /**
+   * Get current theme for template binding
+   */
+  public getCurrentTheme(): string {
+    return this.settings.theme;
   }
 
   private readonly WOPR_SYSTEM_PROMPT = `
@@ -163,11 +179,23 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
     
     // Update launch code service tension music setting
     this.launchCodeService.toggleBeepsAudio(this.settings.tensionMusicEnabled);
+    
+    // Update Matrix background visibility when theme changes
+    if (this.matrixBackground) {
+      this.matrixBackground.updateVisibility(this.isMatrixTheme(), this.settings.theme);
+    }
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  ngAfterViewInit() {
+    // Initialize Matrix background after view is ready
+    if (this.matrixBackground) {
+      this.matrixBackground.updateVisibility(this.isMatrixTheme(), this.settings.theme);
+    }
   }
 
   ngAfterViewChecked() {
