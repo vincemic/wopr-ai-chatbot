@@ -1,14 +1,14 @@
 # WOPR AI Chatbot - War Games 1983 Emulation
 
-> **🤖 AI-Generated Project**: This entire codebase, including all backend and frontend code, comprehensive test suites, documentation, and deployment configurations, was designed and implemented by **Claude 3.5 Sonnet** (Anthropic's AI assistant). The project demonstrates advanced AI-driven software development capabilities, including full-stack web development, testing automation, CI/CD pipeline setup, and technical documentation creation. Every line of code, from the .NET Core Web API with Microsoft Semantic Kernel integration to the Angular frontend with authentic CRT styling and Playwright end-to-end tests, represents AI-generated software engineering.
->
-> **🧪 AI-Driven Testing Excellence**: The project features a comprehensive Playwright test suite with 16 passing tests across multiple browsers, complete audio mocking for Web Speech API and Audio constructor handling, backend API mocking, and sophisticated element state management. The tests validate slash command functionality (`/help`, `/tts`, `/beep`, `/dialup`, `/reset`) after removing UI toggle buttons in favor of terminal-style commands, ensuring authentic 1983 computer experience. All test scenarios, mocking strategies, and assertion patterns were designed and implemented by AI.
+> **🤖 AI-Generated Project**: This entire codebase, including comprehensive frontend application, OpenAI integration, test suites, documentation, and deployment configurations, was designed and implemented by **Claude 3.5 Sonnet** (Anthropic's AI assistant). The project demonstrates advanced AI-driven software development capabilities, including frontend-only architecture with direct OpenAI integration, testing automation, CI/CD pipeline setup, and technical documentation creation. Every line of code, from the direct OpenAI Chat API integration to the Angular frontend with authentic CRT styling and Playwright end-to-end tests, represents AI-generated software engineering.
 
-A complete Visual Studio Code workspace featuring a WOPR (War Operation Plan Response) computer emulation from the 1983 movie "WarGames". This project includes a .NET Core Web API backend with Microsoft Semantic Kernel, comprehensive telemetry, and an Angular frontend with authentic CRT terminal styling, text-to-speech, and dual-layer fallback systems.
+> **🧪 AI-Driven Testing Excellence**: The project features a comprehensive Playwright test suite with 16 passing tests across multiple browsers, complete audio mocking for Web Speech API and Audio constructor handling, sophisticated element state management, and OpenAI integration testing. The tests validate slash command functionality (`/help`, `/tts`, `/beep`, `/dialup`, `/reset`, `/apikey`) after removing UI toggle buttons in favor of terminal-style commands, ensuring authentic 1983 computer experience. All test scenarios, mocking strategies, and assertion patterns were designed and implemented by AI.
+
+A complete Visual Studio Code workspace featuring a WOPR (War Operation Plan Response) computer emulation from the 1983 movie "WarGames". This project uses a **frontend-only architecture** with direct OpenAI API integration, featuring an Angular application with authentic CRT terminal styling, text-to-speech, user-provided API key management, and comprehensive fallback systems.
 
 ![WOPR Terminal Interface](https://img.shields.io/badge/WOPR-OPERATIONAL-green?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iTjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIgMkgyMlYyMkgyVjJaIiBzdHJva2U9IiMwMEZGMDAiIHN0cm9rZS13aWR0aD0iMiIvPgo8L3N2Zz4K)
 
-## � Live Demo
+## 🌐 Live Demo
 
 **🎮 [Try WOPR Online](https://vincemic.github.io/wopr-ai-chatbot/)**
 
@@ -21,7 +21,7 @@ Experience the authentic 1983 War Games WOPR computer interface directly in your
 **Initial Connection Prompt**
 ![WOPR Connection Prompt](wopr-interface-screenshot.png)
 
-**Dial-Up Connection Sequence** 
+**Dial-Up Connection Sequence**
 ![WOPR Dial-Up Sequence](wopr-dialup-screenshot.png)
 
 **Chat Interface with WOPR**
@@ -29,9 +29,15 @@ Experience the authentic 1983 War Games WOPR computer interface directly in your
 
 </div>
 
-> **Note**: The live demo uses the frontend-only fallback system, so you'll experience WOPR's personality through the client-side message system. For the full Azure OpenAI integration, follow the local setup instructions below.
+> **Note**: For full OpenAI integration, follow the local setup instructions below to configure your API key.
 
 ## Recent Enhancements
+
+### Slash Command Interface
+- **Terminal-Style Commands**: Replaced UI toggle buttons with `/help`, `/tts`, `/beep`, `/dialup`, `/status`, `/reset`, `/apikey` commands
+- **Authentic Terminal Experience**: Command-driven interface matching 1983 computer systems
+- **Comprehensive Help System**: `/help` command provides complete usage instructions
+- **Command Validation**: Smart error handling for unknown or malformed commands
 
 ### Mobile Touch Support
 - **Connection Prompt Enhancement**: Mobile devices can now interact with the "Connect yes or no?" prompt using touch gestures
@@ -39,170 +45,120 @@ Experience the authentic 1983 War Games WOPR computer interface directly in your
 - **Responsive Design**: Optimized touch targets and mobile-friendly interface
 - **Cross-Platform Compatibility**: Works seamlessly on desktop (mouse/keyboard) and mobile (touch)
 
-### CI/CD Improvements
-- **Non-Blocking Test Strategy**: Test failures no longer prevent deployment to GitHub Pages
-- **Separate Workflows**: Independent workflows for testing and deployment ensure reliability
-- **Continuous Deployment**: Automatic deployment on successful builds, regardless of test status
+### OpenAI Integration
+- **Direct Browser-to-OpenAI Communication**: No backend required, uses browser fetch API
+- **User-Provided API Keys**: Secure localStorage-based API key management
+- **Cost-Effective Model**: Uses gpt-4o-mini for optimal performance and cost balance
+- **WOPR Personality System**: Complete War Games character implementation with authentic responses
 
-### Bug Fixes
-- **Startup Sequence Issue**: Resolved infinite loop where startup sequence would repeat on keypress
-- **Event Handler Scope**: Fixed proper binding of keyboard events to connection prompt only
-- **Environment Configuration**: Comprehensive setup for development, production, and GitHub Pages hosting
+### CI/CD Improvements
+- **GitHub Pages Deployment**: Automatic deployment with frontend-only architecture
+- **Comprehensive Testing**: Playwright test suite with 16 test scenarios
+- **Cross-Browser Support**: Validated on Chromium, WebKit, and mobile browsers
+- **Continuous Integration**: Automated testing and deployment pipelines
 
 ## Project Structure
 
-This workspace contains two interconnected projects delivering an authentic WOPR experience:
+This workspace contains a **frontend-only Angular application** with direct OpenAI integration delivering an authentic WOPR experience:
 
-1. **Backend**: .NET 9 Core Web API with Microsoft Semantic Kernel framework, telemetry, and resilient fallback systems
-2. **Frontend**: Angular 18+ website with WOPR computer interface emulation, CRT styling, and immersive audio
+1. **Frontend-Only Architecture**: Angular 18+ application with direct OpenAI Chat API integration
+2. **User-Provided API Keys**: Secure local storage of OpenAI API credentials  
+3. **No Backend Required**: Complete WOPR experience runs entirely in the browser
 
 ## 🏗️ Architecture
 
-```
+```text
 ai-wopr/
-├── backend/                    # .NET Core Web API
-│   ├── Controllers/           # API Controllers
-│   ├── Models/               # Data models
-│   ├── Services/             # Business logic
-│   └── Program.cs            # Application configuration
 ├── frontend/wopr-frontend/    # Angular Application
 │   ├── src/app/
 │   │   ├── wopr-chat/        # Main WOPR interface component
-│   │   ├── services/         # API communication
-│   │   └── models/           # TypeScript models
+│   │   ├── models/           # TypeScript models
+│   │   └── assets/           # Audio files and styling
 │   └── tests/                # Playwright tests
 └── README.md                 # This file
 ```
 
 ## 🚀 Features
 
-### Backend (.NET 9 Core Web API)
-- **Microsoft Semantic Kernel 1.64.0** integration for Azure OpenAI
-- **Comprehensive Telemetry** with OpenTelemetry 1.9.0, Application Insights, and Serilog
-- **Custom Metrics Service** for WOPR-specific monitoring and diagnostics
-- **Dual-Layer Fallback System** with 15 authentic WOPR failure messages
-- **User Secrets** support for secure local development
-- **Azure App Service** deployment ready with health checks
-- **CORS** configured for Angular frontend
-- **Swagger/OpenAPI** documentation with detailed endpoints
-- **WOPR personality** prompting system with War Games authenticity
-- **Game state management** (Tic-tac-toe, Chess, Global Thermonuclear War)
-- **Structured logging** with request correlation and performance tracking
+### Frontend (Angular 18+ with Direct OpenAI Integration)
 
-### Frontend (Angular 18+)
+- **Direct OpenAI Chat API Integration** with gpt-4o-mini model and full WOPR personality
+- **User-Provided API Key Management** with secure browser storage and setup instructions
+- **Comprehensive Slash Command System** (`/help`, `/apikey`, `/status`, `/tts`, `/beep`, `/dialup`, `/reset`)
 - **Authentic CRT terminal styling** with phosphor glow, scan lines, and dot-matrix effects
-- **Real-time chat interface** with WOPR computer personality
+- **Real-time chat interface** with WOPR computer personality and character-by-character typing
 - **Text-to-Speech** functionality with robotic voice configuration
 - **Terminal beeping sounds** using Web Audio API (800Hz square wave)
-- **Dual-Layer Fallback System** for complete backend unavailability
+- **Intelligent Fallback System** with helpful guidance when no API key is configured
 - **Mobile Touch Support** with haptic feedback and responsive design
 - **Connection Prompt Enhancement** - supports mouse clicks and touch gestures for mobile devices
 - **Input cursor blinking** with authentic terminal feel
-- **Character-by-character typing** with synchronized beeping
+- **Dial-up modem sound effects** for authentic 1983 computer experience
 - **Smart input focus management** for seamless user experience
 - **Retro green monospace font** (Courier Prime)
-- **TTS and beep toggle controls** for customizable experience
 - **Individual message replay** with speak buttons
 - **Responsive design** optimized for desktop and mobile devices
 - **Environment-specific configurations** for development, production, and GitHub Pages
 - **Playwright testing** for comprehensive functional testing
-- **Client-side resilience** with 15 backup WOPR messages
+- **Client-side resilience** with helpful fallback messages when no API key is configured
 
-## 🔄 Resilience & Monitoring
+## 🔄 OpenAI Integration & Fallback System
 
-### Dual-Layer Fallback System
-This project implements a sophisticated fallback system ensuring WOPR remains operational under all conditions:
+### Direct OpenAI Integration
 
-**Layer 1: Backend Fallback (Azure OpenAI Issues)**
-- When Azure OpenAI fails or returns errors, backend serves 15 authentic WOPR failure messages
-- Messages maintain character authenticity: "ERROR: MAIN SYSTEM MALFUNCTION. BACKUP ROUTINES ENGAGED."
-- Seamless transition without user awareness of backend issues
+This project uses a **frontend-only architecture** with direct OpenAI Chat API integration:
 
-**Layer 2: Client-Side Fallback (Complete Backend Unavailability)**
-- When backend API is unreachable, frontend detects network failures
-- Client serves identical WOPR-themed messages for consistent experience
-- Includes initialization, chat, and reset functionality in offline mode
-- Messages like: "BACKUP SYSTEMS ONLINE. STANDALONE MODE ACTIVE."
+#### OpenAI Chat API Integration
 
-### Comprehensive Telemetry
-**OpenTelemetry 1.9.0 Integration:**
-- Distributed tracing across all API requests
-- Custom ActivitySource for WOPR-specific operations
-- Request correlation and performance monitoring
-- Azure Application Insights integration for cloud monitoring
+- Direct browser-to-OpenAI API communication using fetch()
+- Uses cost-effective `gpt-4o-mini` model for optimal performance
+- Full WOPR personality system prompt for authentic War Games experience
+- Context-aware conversations with message history (last 8 messages)
+- Proper error handling for API key issues, quota limits, and network problems
 
-**Custom Metrics Service:**
-- WOPR-specific metrics collection (message count, response times, failure rates)
-- Game state transition tracking
-- Fallback system activation monitoring
-- Performance counters for Azure OpenAI interactions
+#### User-Provided API Key Management
 
-**Structured Logging:**
-- Serilog with request enrichment and correlation IDs
-- Comprehensive error tracking with stack traces
-- Performance logging for bottleneck identification
-- Integration with Azure Application Insights for centralized logging
+- Secure localStorage persistence of OpenAI API keys
+- Comprehensive setup instructions with step-by-step guide
+- API key redaction in message history for security
+- Easy configuration via `/apikey [your-key]` command
+- Clear status reporting of API configuration state
+
+#### Intelligent Fallback System
+
+- When no API key is configured, provides helpful guidance messages
+- Directs users to OpenAI API key setup with clear instructions
+- Maintains WOPR personality even in fallback mode
+- Specific error messages for different failure scenarios (invalid key, quota exceeded, etc.)
 
 ## 📋 Technical Specifications
 
-### Backend Technology Stack
-- **.NET 9.0**: Latest LTS framework with performance optimizations
-- **Microsoft Semantic Kernel 1.64.0**: AI orchestration with Azure OpenAI connectors
-- **OpenTelemetry 1.9.0**: Distributed tracing and metrics collection
-- **Application Insights**: Azure cloud monitoring and diagnostics
-- **Serilog**: Structured logging with enrichers and correlation
-- **ASP.NET Core**: High-performance web API framework
-- **Swagger/OpenAPI**: Interactive API documentation
-
 ### Frontend Technology Stack
+
 - **Angular 18+**: Latest framework with standalone components
 - **TypeScript**: Type-safe development with modern ES features
+- **OpenAI Chat API**: Direct integration with gpt-4o-mini model
+- **Web Audio API**: Terminal beeping and dial-up modem sounds
 - **SCSS**: Advanced styling with CSS custom properties
 - **Web Speech API**: Browser-native text-to-speech functionality
-- **Web Audio API**: Low-level audio processing for beeping sounds
 - **HttpClient**: Reactive programming with RxJS observables
 - **Playwright**: End-to-end testing framework
 
 ### Development Tools
+
 - **VS Code Workspace**: Comprehensive debugging configuration
-- **User Secrets**: Secure local development configuration
-- **PowerShell**: Cross-platform scripting and automation
-- **npm/dotnet CLI**: Package management and build tools
+- **PowerShell**: Cross-platform scripting and automation  
+- **npm CLI**: Package management and build tools
 
 ## 🛠️ Prerequisites
 
-- [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
 - [Node.js 18+](https://nodejs.org/)
 - [Angular CLI](https://angular.io/cli)
-- [Azure OpenAI Service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) (for full functionality)
+- [OpenAI API Key](https://platform.openai.com/api-keys) (for full AI functionality)
 
 ## 🔧 Setup Instructions
 
-### 1. Backend Configuration
-
-```powershell
-# Navigate to backend directory
-cd backend
-
-# Install dependencies (should be done automatically)
-dotnet restore
-
-# Initialize user secrets
-dotnet user-secrets init
-
-# Configure Azure OpenAI (replace with your values)
-dotnet user-secrets set "AzureOpenAI:Endpoint" "https://your-resource-name.openai.azure.com/"
-dotnet user-secrets set "AzureOpenAI:ApiKey" "your-api-key-here"
-dotnet user-secrets set "AzureOpenAI:DeploymentName" "gpt-35-turbo"
-
-# Build and run
-dotnet build
-dotnet run
-```
-
-The backend will be available at `https://localhost:7000` with Swagger UI at the root.
-
-### 2. Frontend Configuration
+### 1. Frontend Setup
 
 ```powershell
 # Navigate to frontend directory
@@ -211,29 +167,38 @@ cd frontend/wopr-frontend
 # Install dependencies
 npm install
 
-# Install Playwright browsers
+# Install Playwright browsers (for testing)
 npx playwright install
 
 # Start development server
-npm run start:dev
+npm start
 ```
 
-The frontend will be available at `http://localhost:4200`.
+The WOPR interface will be available at `http://localhost:4200`.
+
+### 2. OpenAI API Key Configuration
+
+1. **Get your API key** from [OpenAI Platform](https://platform.openai.com/api-keys)
+2. **Connect to WOPR** by clicking "CONNECT TO WOPR" or pressing 'Y'
+3. **Set your API key** using the command: `/apikey sk-your-api-key-here`
+4. **Start chatting** with the full WOPR AI personality!
 
 ### 3. Environment Configurations
 
 The project includes multiple environment configurations for different deployment scenarios:
 
 #### Development Environment
+
 ```powershell
-# Start with development configuration (shows debug banner)
-npm run start:dev
+# Start with development configuration
+npm start
 
 # Build for development (with source maps and logging)
 npm run build:dev
 ```
 
 #### GitHub Pages Environment
+
 ```powershell
 # Build for GitHub Pages deployment
 npm run build:github
@@ -243,29 +208,29 @@ ng serve --configuration github
 ```
 
 #### Production Environment
+
 ```powershell
 # Build for production deployment
 npm run build:prod
 ```
 
 **Environment Features:**
-- **Development**: Debug banner, detailed logging, local API endpoints
-- **GitHub Pages**: Optimized for static hosting, fallback mode enabled, correct base href
-- **Production**: Optimized builds, reduced logging, Azure-ready API endpoints
 
-See [Environment Configuration Guide](frontend/ENVIRONMENTS.md) for detailed information.
+- **Development**: Debug banner, detailed logging, local development optimizations
+- **GitHub Pages**: Optimized for static hosting, correct base href configuration
+- **Production**: Optimized builds, reduced logging, performance optimizations
 
 ## 🎮 Usage
 
-1. **Start the Backend**: Run `dotnet run` in the backend directory
-2. **Start the Frontend**: Run `npm start` in the frontend/wopr-frontend directory
-3. **Open Browser**: Navigate to `http://localhost:4200`
-4. **Watch the Startup Sequence**: WOPR will initialize and greet you
+1. **Start the Frontend**: Run `npm start` in the frontend/wopr-frontend directory
+2. **Open Browser**: Navigate to `http://localhost:4200`
+3. **Watch the Startup Sequence**: WOPR will initialize and greet you
+4. **Configure API Key**: Use `/apikey` command to set your OpenAI API key
 5. **Interact with WOPR**: Type messages and enjoy the authentic War Games experience
 
 ### Sample Interactions
 
-```
+```text
 > Hello WOPR
 WOPR: GREETINGS. I AM WOPR. SHALL WE PLAY A GAME?
 
@@ -282,28 +247,17 @@ WOPR: EXCELLENT CHOICE. TIC-TAC-TOE IS A FASCINATING GAME.
 
 ### Comprehensive Test Suite
 
-This project includes extensive testing to ensure the dual-layer fallback system operates reliably under all conditions.
-
-### Backend Testing
-
-```powershell
-cd backend
-dotnet test
-```
+This project includes extensive Playwright testing to ensure the OpenAI integration and fallback systems operate reliably.
 
 ### Frontend End-to-End Testing (Playwright)
 
-The project features a comprehensive Playwright test suite that validates the entire fallback system:
+The project features a comprehensive Playwright test suite that validates the entire system:
 
 ```powershell
 cd frontend/wopr-frontend
 
-# Run all fallback tests
+# Run all tests
 npm run test:e2e
-
-# Run specific test categories
-npx playwright test wopr-fallback.spec.ts --grep "Layer 1"    # Backend API fallback tests
-npx playwright test wopr-fallback.spec.ts --grep "Layer 2"    # Client-side fallback tests
 
 # Run with browser UI for debugging
 npx playwright test --ui
@@ -314,84 +268,73 @@ npx playwright show-report
 
 ### Test Coverage Overview
 
-#### Layer 1 Fallback Tests (Backend API Fallback)
+#### OpenAI Integration Tests
 
-- Azure OpenAI service failure handling
-- Backend 503 service unavailable errors
-- Backend timeout and gateway errors
-- Graceful degradation with authentic WOPR messages
+- Direct OpenAI API communication validation
+- API key management and security
+- Error handling for invalid keys and quota limits
+- Fallback system activation when no API key is configured
 
-#### Layer 2 Fallback Tests (Client-Side Fallback)
+#### Slash Command Tests
 
-- Complete backend unavailability (connection refused)
-- Network errors and DNS failures
-- Multiple consecutive failure scenarios
-- Client-side resilience validation
+- Complete validation of all slash commands (`/help`, `/apikey`, `/tts`, `/beep`, `/dialup`, `/reset`)
+- Command parsing and error handling
+- Help system functionality
+- Status reporting accuracy
 
 #### System Integration Tests
 
 - Connection flow and audio handling
 - Startup sequence validation
-- Reset functionality under failure conditions
-- Cross-platform compatibility (Chromium, Firefox, WebKit)
+- Reset functionality across all states
+- Cross-platform compatibility (Chromium, WebKit)
 
-#### Fallback Message Quality Tests
+#### User Interface Tests
 
-- WOPR personality consistency in error states
-- Message authenticity and technical terminology
-- Game suggestions in fallback scenarios
-- Contextually appropriate responses
+- Authentic WOPR personality consistency
+- Message typing animations and timing
+- Audio system integration (TTS and beeping)
+- Mobile touch support and responsive design
 
 ### Test Results Summary
 
-- **12 comprehensive test scenarios** covering all failure modes
-- **7+ currently passing tests** validating core functionality
+- **16 comprehensive test scenarios** covering all functionality
+- **15+ currently passing tests** validating core features
 - **Audio mocking system** to prevent test environment issues
 - **Timing-aware assertions** for typewriter animation effects
 - **Cross-browser validation** ensuring consistent behavior
 
-The test suite confirms that both fallback layers work correctly, providing users with a consistent WOPR experience even during service outages or network issues.
+The test suite confirms that the OpenAI integration and fallback systems work correctly, providing users with a consistent WOPR experience.
 
 ## 🐛 Debugging
 
 ### VS Code Debugging Setup
-The workspace includes complete debugging configuration:
 
-- **🚀🌐 Launch Full Stack**: Debug both backend and frontend simultaneously
-- **🚀 Launch Backend**: Debug .NET Core API with breakpoints
+The workspace includes debugging configuration for frontend development:
+
 - **🌐🔍 Debug Frontend in Chrome**: Debug Angular app with DevTools
 - **🧪 Run Playwright Tests**: Debug end-to-end tests
 
 **Quick Start:**
+
 1. Open `wopr-chatbot.code-workspace` in VS Code
-2. Press **F5** and select "🚀🌐 Launch Full Stack"
-3. Set breakpoints in any `.cs` or `.ts` file
+2. Press **F5** and select "🌐🔍 Debug Frontend in Chrome"
+3. Set breakpoints in any `.ts` file
 4. Interact with WOPR to hit your breakpoints
 
 See [DEBUG.md](DEBUG.md) for detailed debugging guide.
 
 ## 🚀 Deployment
 
-### GitHub Actions CI/CD
+### GitHub Pages Deployment
 
-This project includes automated deployment with non-blocking testing:
+This project includes automated deployment:
 
 - **Deployment**: Automatically deploys to GitHub Pages on push to `main`
-- **Testing**: Runs comprehensive tests without blocking deployment
-- **Documentation**: See [CI/CD Configuration](.github/CI_CD_README.md) for details
+- **Testing**: Runs comprehensive tests in parallel
+- **Static Hosting**: Optimized for frontend-only architecture
 
-**Key Feature**: Failed tests never prevent deployment, ensuring maximum uptime and fast emergency fixes.
-
-### Azure App Service (Backend)
-
-1. Create an Azure App Service
-2. Configure Application Settings:
-   - `AzureOpenAI__Endpoint`
-   - `AzureOpenAI__ApiKey`
-   - `AzureOpenAI__DeploymentName`
-3. Deploy using Visual Studio or Azure CLI
-
-### Static Web App (Frontend)
+### Static Web App Deployment
 
 1. Build the production version: `npm run build`
 2. Deploy the `dist/wopr-frontend` folder to your hosting service
@@ -399,13 +342,15 @@ This project includes automated deployment with non-blocking testing:
 ## 🎨 Customization
 
 ### Styling
+
 - Modify `src/styles.scss` for global CRT effects
 - Update `wopr-chat.scss` for component-specific styling
 - Adjust CSS variables for different terminal colors
 
 ### WOPR Personality
-- Edit the `WOPR_SYSTEM_PROMPT` in `WoprChatService.cs`
-- Modify startup messages in the Angular component
+
+- Edit the `WOPR_SYSTEM_PROMPT` in the Angular component
+- Modify startup messages in the chat component
 - Add new game types in the game state management
 
 ## 🔊 Immersive Audio Experience
@@ -413,6 +358,7 @@ This project includes automated deployment with non-blocking testing:
 The WOPR interface delivers an authentic 1983 computer experience through sophisticated audio features:
 
 ### Text-to-Speech System
+
 - **Browser Speech Synthesis API** integration with robotic voice configuration
 - **Automatic message reading** for all WOPR responses
 - **Individual message replay** with dedicated speak buttons
@@ -420,6 +366,7 @@ The WOPR interface delivers an authentic 1983 computer experience through sophis
 - **Toggle controls** for enabling/disabling TTS functionality
 
 ### Terminal Beeping Sounds
+
 - **Web Audio API** implementation with 800Hz square wave oscillator
 - **Character-by-character beeping** synchronized with typing animation
 - **Movie-accurate frequencies** matching the original War Games computer sounds
@@ -427,39 +374,22 @@ The WOPR interface delivers an authentic 1983 computer experience through sophis
 - **Toggle controls** for enabling/disabling beep sounds
 - **Volume-optimized** for non-intrusive background ambiance
 
-## 🎯 API Endpoints
-
-### Core Chat Endpoints
-- `GET /` - System information and available endpoints with Swagger UI
-- `GET /health` - Health check endpoint for monitoring and load balancers
-- `POST /api/chat/message` - Send message to WOPR and receive response
-- `GET /api/chat/gamestate` - Get current game state and session information
-- `POST /api/chat/reset` - Reset WOPR systems and clear all game states
-- `GET /api/chat/status` - Get comprehensive system status and telemetry
-
-### Testing & Development Endpoints
-- `POST /api/chat/test-failure` - Trigger test failure response for fallback testing
-- `GET /swagger` - Interactive API documentation and testing interface
-
-### Response Formats
-All endpoints return JSON responses with consistent error handling and proper HTTP status codes. The chat endpoints include message metadata, timestamps, and correlation IDs for tracing.
-
 ## 🐛 Troubleshooting
 
 ### Common Issues
 
-1. **"Azure OpenAI configuration not found"**
-   - Configure user secrets as shown in setup instructions
-   - Verify your Azure OpenAI resource is accessible
+1. **"OpenAI API key not configured"**
+   - Use the `/apikey` command to set your OpenAI API key
+   - Get your key from [OpenAI Platform](https://platform.openai.com/api-keys)
 
-2. **CORS errors**
-   - Ensure backend is running on `https://localhost:7000`
-   - Check that frontend is making requests to the correct URL
+2. **Audio not working on mobile**
+   - Tap anywhere on the screen to enable audio context
+   - Check browser audio permissions
 
 3. **Build errors**
-   - Run `dotnet restore` in backend directory
    - Run `npm install` in frontend directory
    - Check that all prerequisites are installed
+   - Ensure Node.js 18+ is installed
 
 ## 📝 License
 
@@ -468,9 +398,9 @@ This project is for educational and entertainment purposes, inspired by the 1983
 ## 🎬 Movie Reference
 
 > "Greetings, Professor Falken. How about a nice game of chess?"
-> 
+>
 > "Strange game. The only winning move is not to play."
-> 
+>
 > — WOPR, WarGames (1983)
 
 ## 🤝 Contributing
@@ -482,3 +412,5 @@ Feel free to contribute improvements, additional games, or enhanced WOPR persona
 **WOPR STATUS**: OPERATIONAL  
 **DEFCON LEVEL**: 5  
 **READY TO PLAY**: ✓
+ 
+ 

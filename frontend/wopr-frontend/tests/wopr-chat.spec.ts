@@ -180,7 +180,10 @@ test.describe('WOPR Chat Interface', () => {
     // Click reset button
     await page.click('.reset-button');
     
-    // Should show reset confirmation (with fallback behavior since backend is mocked to fail)
+    // Wait for all reset messages to be typed (3 messages total)
+    await expect(page.locator('.message')).toHaveCount(3);
+    
+    // Should show reset confirmation as the last message
     await expect(page.locator('.message').last()).toContainText('SHALL WE PLAY A GAME?');
   });
 

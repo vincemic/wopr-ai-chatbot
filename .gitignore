@@ -15,6 +15,11 @@ npm-debug.log
 yarn-error.log
 package-lock.json
 
+# Test results and coverage
+/frontend/wopr-frontend/test-results/
+/frontend/wopr-frontend/playwright-report/
+/frontend/wopr-frontend/coverage/
+
 # User secrets and configuration
 **/user-secrets.json
 **/user-secrets

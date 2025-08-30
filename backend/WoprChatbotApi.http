@@ -1,6 +1,0 @@
-@WoprChatbotApi_HostAddress = http://localhost:5044
-
-GET {{WoprChatbotApi_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

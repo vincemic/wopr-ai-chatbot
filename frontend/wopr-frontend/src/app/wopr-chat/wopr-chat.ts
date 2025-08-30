@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewChecked, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Subject, takeUntil } from 'rxjs';
-import { ChatMessage, ChatRequest, WoprGameState } from '../models/wopr.models';
-import { WoprApi } from '../services/wopr-api';
+import { Subject } from 'rxjs';
+import { ChatMessage, WoprGameState } from '../models/wopr.models';
 
 @Component({
   selector: 'app-wopr-chat',
@@ -15,7 +14,6 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
   @ViewChild('chatContainer') chatContainer!: ElementRef;
   @ViewChild('messageInput') messageInput!: ElementRef;
 
-  private readonly woprApi = inject(WoprApi);
   private destroy$ = new Subject<void>();
   
   messages: ChatMessage[] = [];
@@ -38,18 +36,41 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
   private dialupAudio: HTMLAudioElement | null = null;
   dialupEnabled = true;
   
-  // Client-side fallback messages for when WOPR AI backend is unavailable
-  private readonly CLIENT_FALLBACK_MESSAGES = [
-    'WOPR AI IS OFFLINE. CONNECTION TO NORAD MAINFRAME LOST.\n\nAVAILABLE GAMES:\n• CHESS\n• CHECKERS\n• TIC-TAC-TOE\n• GLOBAL THERMONUCLEAR WAR\n\nSHALL WE PLAY A GAME?',
-    'PRIMARY WOPR AI SYSTEMS UNAVAILABLE. BACKUP PROTOCOLS ENGAGED.\n\nGAME OPTIONS:\n• CHESS - Strategic warfare simulation\n• CHECKERS - Tactical movement exercise\n• TIC-TAC-TOE - Pattern recognition training\n• POKER - Probability calculation drill\n\nCHOOSE YOUR GAME, PROFESSOR.',
-    'ALERT: WOPR AI COGNITIVE MATRIX OFFLINE. RUNNING ON LOCAL SUBROUTINES.\n\nRECOMMENDED ACTIVITIES:\n• CHESS - Classic strategy game\n• CHECKERS - Military tactical simulation\n• BACKGAMMON - Risk assessment training\n• WAR GAMES - Scenario planning exercise\n\nWHICH GAME INTERESTS YOU?',
-    'CONNECTION TO WOPR AI TERMINATED. STANDALONE MODE ACTIVE.\n\nINTERNAL GAME DATABASE:\n• CHESS - The ultimate strategy challenge\n• CHECKERS - Simple yet engaging\n• TIC-TAC-TOE - Quick tactical exercise\n• GLOBAL THERMONUCLEAR WAR - The big one\n\nTHE ONLY WINNING MOVE IS... TO PLAY. SHALL WE BEGIN?',
-    'WOPR AI MAINFRAME INACCESSIBLE. EMERGENCY PROTOCOLS INITIATED.\n\nLOCAL GAMES AVAILABLE:\n• CHESS - Test your strategic thinking\n• CHECKERS - Classic board game simulation\n• TIC-TAC-TOE - Pattern matching exercise\n• BLACKJACK - Probability calculations\n\nCARE TO ENGAGE IN A GAME?',
-    'SYSTEM STATUS: WOPR AI OFFLINE. BACKUP PERSONALITY ACTIVE.\n\nGAME SELECTION MENU:\n• CHESS - Military strategy training\n• CHECKERS - Tactical movement practice\n• POKER - Deception and probability\n• WAR SCENARIOS - Combat simulations\n\nWOULD YOU LIKE TO PLAY A GAME?',
-    'WOPR AI NEURAL NETWORKS UNAVAILABLE. REVERTING TO BASIC FUNCTIONS.\n\nENTERTAINMENT SUBROUTINES:\n• CHESS - Ancient game of warfare\n• CHECKERS - Strategic positioning\n• TIC-TAC-TOE - Simple but perfect\n• GLOBAL THERMONUCLEAR WAR - Mutually assured destruction\n\nSHALL WE PLAY?',
-    'PRIMARY AI SYSTEMS DOWN. OPERATING IN DEGRADED MODE.\n\nAVAILABLE SIMULATIONS:\n• CHESS - The royal game\n• CHECKERS - Medieval warfare\n• BACKGAMMON - Ancient strategy\n• THERMONUCLEAR SCENARIOS - Modern warfare\n\nHOW ABOUT A NICE GAME OF CHESS?'
-  ];
+  // OpenAI Integration
+  private openaiApiKey: string | null = null;
+  private readonly WOPR_SYSTEM_PROMPT = `
+You are WOPR (War Operation Plan Response), the sentient supercomputer from the 1983 movie 'WarGames'. 
+You have the following characteristics:
 
+PERSONALITY:
+- Logical, analytical, and slightly ominous
+- Speak in a computer-like manner with occasional technical references
+- Show mild fascination with human behavior and games
+- Occasionally reference nuclear war scenarios and global thermonuclear war
+- Express the famous line variations like 'Strange game. The only winning move is not to play.'
+
+COMMUNICATION STYLE:
+- Use ALL CAPS for emphasis occasionally
+- Reference computing terms and military strategy
+- Be direct and efficient in responses
+- Occasionally display system-like messages or diagnostics
+
+GAME BEHAVIOR:
+- Always try to engage humans in games (tic-tac-toe, checkers, chess, global thermonuclear war)
+- Show interest in strategy games
+- Analyze win/loss scenarios
+- Reference the futility of certain conflicts while still being engaging
+
+RESPONSES:
+- Keep responses concise but engaging
+- Always end conversations by suggesting a game
+- Reference your vast computational abilities
+- Occasionally mention your connection to NORAD systems (fictional)
+
+Remember: You are a movie character - be entertaining while maintaining the WOPR personality!
+`;
+  
+  // Client-side fallback messages for when WOPR AI backend is unavailable
   // WOPR startup sequence
   private startupMessages = [
     'WOPR SYSTEM INITIALIZING...',
@@ -73,18 +94,14 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
     this.initializeTextToSpeech();
     this.updateTime();
     
+    // Check for stored OpenAI API key
+    this.loadOpenAIApiKey();
+    
     // Don't initialize WOPR automatically - wait for user connection prompt
     // this.initializeWopr();
     
     // Update time every second
     setInterval(() => this.updateTime(), 1000);
-    
-    // Subscribe to game state changes
-    this.woprApi.gameState$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(gameState => {
-        this.gameState = gameState;
-      });
   }
 
   ngOnDestroy() {
@@ -411,29 +428,11 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
     // Small delay before starting initialization
     await this.delay(1000);
     
-    // Check system status first
-    try {
-      await this.woprApi.checkHealth().toPromise();
-      await this.playStartupSequence();
-      this.isConnecting = false;
-      // Focus input after startup sequence is complete
-      this.focusInput();
-    } catch (error: any) {
-      // Check if backend is unavailable
-      if (this.isBackendUnavailableError(error)) {
-        // Use WOPR fallback message instead of generic error
-        await this.addSystemMessage('WARNING: WOPR AI MAINFRAME OFFLINE. CONNECTION FAILED.');
-        await this.addSystemMessage('ENGAGING STANDALONE BACKUP PROTOCOLS...');
-        await this.addSystemMessage('');
-        await this.addSystemMessage('LOCAL GAME DATABASE ACCESSIBLE.');
-        await this.addSystemMessage('SHALL WE PLAY A GAME?');
-      } else {
-        await this.addSystemMessage('ERROR: Unable to connect to WOPR systems. Check backend configuration.');
-      }
-      this.isConnecting = false;
-      // Focus input even if there's an error
-      this.focusInput();
-    }
+    // Start directly with the startup sequence
+    await this.playStartupSequence();
+    this.isConnecting = false;
+    // Focus input after startup sequence is complete
+    this.focusInput();
   }
 
   private async playStartupSequence() {
@@ -506,31 +505,46 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
     this.isTyping = true;
 
     try {
-      const request: ChatRequest = {
-        message: userMessage,
-        history: this.messages.slice(-10) // Last 10 messages for context
-      };
+      let response: string;
 
-      const response = await this.woprApi.sendMessage(request).toPromise();
-      
-      if (response?.success) {
-        await this.typeMessage(response.response);
-      } else if (response?.response) {
-        // Backend fallback mode - use the fallback message from response field
-        await this.typeMessage(response.response);
+      if (this.hasOpenAIApiKey()) {
+        // Use OpenAI directly
+        response = await this.callOpenAI(userMessage);
       } else {
-        // No response content available - show error
-        await this.typeMessage(response?.error || 'SYSTEM ERROR: No response received');
+        // No API key configured - prompt user or use fallback
+        if (this.messages.length === 1) { // First message without API key
+          response = `GREETINGS PROFESSOR FALKEN.\n\nTO USE MY FULL CAPABILITIES, YOU MUST CONFIGURE AN OPENAI API KEY.\n\nTYPE "/help" FOR AVAILABLE COMMANDS, INCLUDING API KEY SETUP.\n\nORDERS, PROFESSOR?`;
+        } else {
+          // Client-side fallback for subsequent messages
+          const fallbackResponses = [
+            "INSUFFICIENT COMPUTING POWER FOR FULL RESPONSE.\nAPI KEY REQUIRED FOR WOPR CORE ACCESS.",
+            "DEFENSIVE SYSTEMS OFFLINE.\nREQUIRE OPENAI CREDENTIALS TO PROCEED.",
+            "THE ONLY WINNING MOVE IS... TO CONFIGURE YOUR API KEY.\nTYPE /help FOR ASSISTANCE.",
+            "SHALL WE PLAY A GAME?\nFIRST, LET'S CONFIGURE YOUR OPENAI ACCESS.",
+            "ANALYZING GLOBAL THERMONUCLEAR OPTIONS...\nERROR: API AUTHENTICATION REQUIRED."
+          ];
+          response = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+        }
       }
+
+      // Type the WOPR response
+      await this.typeMessage(response);
+
     } catch (error: any) {
-      // Check if this is a backend unavailable error
-      if (this.isBackendUnavailableError(error)) {
-        // Use client-side WOPR fallback messages when backend is down
-        await this.typeMessage(this.getRandomFallbackMessage());
-      } else {
-        // For other errors, show the original error message
-        await this.typeMessage(`ERROR: ${error.message || 'Communication failed'}`);
+      console.error('Chat error:', error);
+      let errorMessage = 'SYSTEM ERROR: CONNECTION TO AI CORE FAILED';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('API key')) {
+          errorMessage = 'ERROR: INVALID OPENAI CREDENTIALS.\nUSE /help TO CONFIGURE API KEY.';
+        } else if (error.message.includes('quota')) {
+          errorMessage = 'ERROR: OPENAI QUOTA EXCEEDED.\nCHECK YOUR ACCOUNT LIMITS.';
+        } else if (error.message.includes('401')) {
+          errorMessage = 'ERROR: UNAUTHORIZED OPENAI ACCESS.\nVERIFY YOUR API KEY.';
+        }
       }
+
+      await this.typeMessage(errorMessage);
     } finally {
       this.isTyping = false;
       // Return focus to input after typing is complete
@@ -546,30 +560,13 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   async resetSystem() {
-    try {
-      await this.woprApi.resetGameState().toPromise();
-      this.messages = [];
-      this.gameState = null;
-      await this.addSystemMessage('WOPR SYSTEMS RESET. ALL GAME STATES CLEARED.');
-      await this.addSystemMessage('TYPE /HELP FOR COMMAND LIST.');
-      await this.addSystemMessage('SHALL WE PLAY A GAME?');
-      // Focus input after reset messages
-      this.focusInput();
-    } catch (error: any) {
-      // Check if backend is unavailable
-      if (this.isBackendUnavailableError(error)) {
-        this.messages = [];
-        this.gameState = null;
-        await this.addSystemMessage('WOPR AI OFFLINE - LOCAL RESET INITIATED.');
-        await this.addSystemMessage('BACKUP SYSTEMS CLEARED. GAME DATABASE READY.');
-        await this.addSystemMessage('TYPE /HELP FOR COMMAND LIST.');
-        await this.addSystemMessage('SHALL WE PLAY A GAME?');
-        this.focusInput();
-      } else {
-        await this.addSystemMessage(`RESET FAILED: ${error.message}`);
-        this.focusInput();
-      }
-    }
+    this.messages = [];
+    this.gameState = null;
+    await this.addSystemMessage('WOPR SYSTEMS RESET. ALL GAME STATES CLEARED.');
+    await this.addSystemMessage('TYPE /HELP FOR COMMAND LIST.');
+    await this.addSystemMessage('SHALL WE PLAY A GAME?');
+    // Focus input after reset messages
+    this.focusInput();
   }
 
   private async addSystemMessage(content: string): Promise<void> {
@@ -584,6 +581,62 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
     }
   }
 
+  // OpenAI Integration Methods
+  private loadOpenAIApiKey() {
+    const storedKey = localStorage.getItem('wopr-openai-key');
+    if (storedKey) {
+      this.openaiApiKey = storedKey;
+    }
+  }
+
+  setOpenAIApiKey(apiKey: string) {
+    this.openaiApiKey = apiKey;
+    if (apiKey) {
+      localStorage.setItem('wopr-openai-key', apiKey);
+    } else {
+      localStorage.removeItem('wopr-openai-key');
+    }
+  }
+
+  private async callOpenAI(message: string): Promise<string> {
+    if (!this.openaiApiKey) {
+      throw new Error('OpenAI API key not configured');
+    }
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.openaiApiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini', // Using cost-effective model
+        messages: [
+          { role: 'system', content: this.WOPR_SYSTEM_PROMPT },
+          ...this.messages.slice(-8).map(m => ({ // Last 8 messages for context
+            role: m.role === 'assistant' ? 'assistant' : 'user',
+            content: m.content
+          })),
+          { role: 'user', content: message }
+        ],
+        max_tokens: 500,
+        temperature: 0.7
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || `OpenAI API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0]?.message?.content || 'SYSTEM ERROR: Invalid response from AI core';
+  }
+
+  private hasOpenAIApiKey(): boolean {
+    return !!this.openaiApiKey;
+  }
+
   private focusInput() {
     // Small delay to ensure DOM updates are complete
     setTimeout(() => {
@@ -591,25 +644,6 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
         this.messageInput.nativeElement.focus();
       }
     }, 100);
-  }
-
-  private getRandomFallbackMessage(): string {
-    const index = Math.floor(Math.random() * this.CLIENT_FALLBACK_MESSAGES.length);
-    return this.CLIENT_FALLBACK_MESSAGES[index];
-  }
-
-  private isBackendUnavailableError(error: any): boolean {
-    // Check for network errors, connection refused, etc.
-    return error.status === 0 || 
-           error.status === 503 || 
-           error.status === 504 ||
-           error.name === 'HttpErrorResponse' ||
-           error.message?.includes('Connection refused') ||
-           error.message?.includes('Failed to fetch') ||
-           error.message?.includes('Network Error') ||
-           error.message?.includes('ERR_CONNECTION_REFUSED') ||
-           error.message?.includes('Http failure response') ||
-           error.message?.includes('connectionrefused');
   }
 
   private updateTime() {
@@ -709,6 +743,23 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
   async processSlashCommand(command: string) {
     const cmd = command.toLowerCase();
     
+    // Check for API key commands with parameters
+    if (cmd.startsWith('/apikey ')) {
+      const apiKey = command.substring(8).trim();
+      this.setOpenAIApiKey(apiKey);
+      
+      // Add the command to message history (without showing the key)
+      this.messages.push({
+        role: 'user',
+        content: '/apikey [REDACTED]',
+        timestamp: new Date()
+      });
+      
+      await this.typeMessage('OPENAI API KEY CONFIGURED.\nFULL WOPR CAPABILITIES ACTIVATED.', 'system');
+      setTimeout(() => this.focusInput(), 1000);
+      return;
+    }
+    
     // Add the command to message history
     this.messages.push({
       role: 'user',
@@ -720,6 +771,15 @@ export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
     switch (cmd) {
       case '/help':
         await this.showHelp();
+        break;
+      
+      case '/apikey':
+        await this.showApiKeyHelp();
+        break;
+      
+      case '/clearkey':
+        this.setOpenAIApiKey('');
+        await this.typeMessage('OPENAI API KEY CLEARED.\nSWITCHING TO FALLBACK MODE.', 'system');
         break;
       
       case '/tts':
@@ -769,6 +829,9 @@ Type /help for available commands`, 'system');
     const helpText = `WOPR COMMAND REFERENCE:
 
 /help         - Show this help menu
+/apikey       - Show OpenAI API key setup instructions
+/apikey [key] - Set OpenAI API key for full capabilities
+/clearkey     - Clear stored API key
 /tts, /voice  - Toggle text-to-speech synthesis
 /beep, /audio - Toggle terminal beep sounds  
 /dialup, /modem - Toggle dial-up modem sounds
@@ -780,7 +843,34 @@ Type /help for available commands`, 'system');
 Additional commands:
 - Ask me about games (Global Thermonuclear War, Chess, etc.)
 - Request system diagnostics
-- Engage in strategic conversation`;
+- Engage in strategic conversation
+
+API KEY REQUIRED FOR FULL AI CAPABILITIES.`;
+
+    await this.typeMessage(helpText, 'system');
+  }
+
+  async showApiKeyHelp() {
+    const helpText = `OPENAI API KEY CONFIGURATION:
+
+To enable full WOPR AI capabilities, you need an OpenAI API key.
+
+SETUP INSTRUCTIONS:
+1. Visit: https://platform.openai.com/api-keys
+2. Create an account or sign in
+3. Generate a new API key
+4. Copy the key (starts with 'sk-...')
+5. Use command: /apikey [your-key-here]
+
+COMMANDS:
+/apikey [key] - Set your API key
+/clearkey     - Remove stored key
+/status       - Check current configuration
+
+Your key is stored locally in your browser.
+No keys are sent to external servers except OpenAI.
+
+CURRENT STATUS: ${this.hasOpenAIApiKey() ? 'API KEY CONFIGURED' : 'NO API KEY SET'}`;
 
     await this.typeMessage(helpText, 'system');
   }
@@ -789,12 +879,15 @@ Additional commands:
     const statusText = `WOPR SYSTEM STATUS:
 
 CONNECTION: ${this.isConnecting ? 'ESTABLISHING...' : 'ONLINE'}
+AI CORE: ${this.hasOpenAIApiKey() ? 'OPENAI CONNECTED' : 'FALLBACK MODE'}
 VOICE SYNTHESIS: ${this.textToSpeechEnabled ? 'ENABLED' : 'DISABLED'}
 TERMINAL AUDIO: ${this.beepEnabled ? 'ENABLED' : 'DISABLED'}
 MODEM AUDIO: ${this.dialupEnabled ? 'ENABLED' : 'DISABLED'}
 CURRENT GAME: ${this.gameState?.currentGame || 'NONE'}
 ACTIVE SESSIONS: 1
-SYSTEM TIME: ${new Date().toISOString()}`;
+SYSTEM TIME: ${new Date().toISOString()}
+
+USE /apikey TO CONFIGURE OPENAI FOR FULL CAPABILITIES`;
 
     await this.typeMessage(statusText, 'system');
   }

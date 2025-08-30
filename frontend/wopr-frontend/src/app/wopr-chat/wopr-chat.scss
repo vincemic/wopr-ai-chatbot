@@ -196,6 +196,12 @@
     0 0 10px var(--crt-amber),
     0 0 20px var(--crt-amber);
   margin-bottom: 2px;
+  caret-color: transparent;
+  animation: none;
+  
+  &::after {
+    content: none;
+  }
 }
 
 .subtitle {
