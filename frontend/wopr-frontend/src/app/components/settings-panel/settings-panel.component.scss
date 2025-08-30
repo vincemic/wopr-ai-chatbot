@@ -372,39 +372,6 @@
   }
 }
 
-.settings-toggle {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: rgba(0, 255, 0, 0.1);
-  border: 2px solid var(--crt-green);
-  color: var(--crt-green);
-  font-size: 1.5rem;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  z-index: 999;
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
-  
-  &:hover {
-    background: var(--crt-green);
-    color: var(--crt-black);
-    box-shadow: 0 0 20px var(--crt-green);
-    transform: rotate(90deg);
-  }
-  
-  &.panel-open {
-    background: var(--crt-amber);
-    border-color: var(--crt-amber);
-    color: var(--crt-black);
-    box-shadow: 0 0 20px var(--crt-amber);
-    transform: rotate(180deg);
-  }
-}
-
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .settings-container {
@@ -431,14 +398,6 @@
   
   .action-button {
     text-align: center;
-  }
-  
-  .settings-toggle {
-    top: 15px;
-    right: 15px;
-    width: 45px;
-    height: 45px;
-    font-size: 1.3rem;
   }
   
   .api-key-container {

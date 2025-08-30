@@ -34,7 +34,7 @@ Experience the authentic 1983 War Games WOPR computer interface directly in your
 - **Visual Settings Panel**: Modern interface with organized categories for audio, display, and AI preferences
 - **Real-Time Updates**: Instant application of setting changes with reactive programming patterns
 - **Import/Export Functionality**: JSON-based settings backup and restore capabilities
-- **Settings Commands**: New slash commands `/settings`, `/export-settings`, `/reset-settings` for terminal-style configuration
+- **Settings Commands**: New slash commands `/config`, `/export-settings`, `/reset-settings` for terminal-style configuration
 - **Theme Support**: Multiple visual themes (Classic Green, Amber, Blue, Matrix) with CSS custom properties
 - **Mobile Responsive**: Touch-friendly settings interface optimized for all device sizes
 - **Accessibility Compliant**: ARIA labels, screen reader support, and keyboard navigation
@@ -96,7 +96,7 @@ ai-wopr/
 - **Direct OpenAI Chat API Integration** with gpt-4o-mini model and full WOPR personality
 - **User-Provided API Key Management** with secure browser storage and setup instructions
 - **Persistent Settings System** with localStorage, visual settings panel, and import/export functionality
-- **Comprehensive Slash Command System** (`/help`, `/apikey`, `/status`, `/tts`, `/beep`, `/dialup`, `/tension`, `/reset`, `/settings`)
+- **Comprehensive Slash Command System** (`/help`, `/apikey`, `/status`, `/tts`, `/beep`, `/dialup`, `/tension`, `/reset`, `/config`)
 - **Multiple Visual Themes** including Classic Green, Amber, Blue, and Matrix with real-time switching
 - **Authentic CRT terminal styling** with phosphor glow, scan lines, and dot-matrix effects
 - **Real-time chat interface** with WOPR computer personality and character-by-character typing
@@ -242,12 +242,12 @@ npm run build:prod
 2. **Open Browser**: Navigate to `http://localhost:4200`
 3. **Watch the Startup Sequence**: WOPR will initialize and greet you
 4. **Configure API Key**: Use `/apikey` command to set your OpenAI API key
-5. **Access Settings**: Use `/settings` command to open the settings panel and customize your experience
+5. **Access Settings**: Use `/config` command to open the settings panel and customize your experience
 6. **Interact with WOPR**: Type messages and enjoy the authentic War Games experience
 
 ### Settings Configuration
 
-The WOPR interface includes a comprehensive settings system accessible via the `/settings` command:
+The WOPR interface includes a comprehensive settings system accessible via the `/config` command:
 
 #### Audio Settings
 
@@ -282,14 +282,14 @@ All settings are automatically saved to localStorage and persist across browser 
 > Hello WOPR
 WOPR: GREETINGS. I AM WOPR. SHALL WE PLAY A GAME?
 
-> /settings
+> /config
 WOPR: SETTINGS PANEL ACTIVATED. CONFIGURE YOUR WOPR EXPERIENCE.
 [Settings panel opens with audio, display, and AI options]
 
 > /help
 WOPR: AVAILABLE COMMANDS:
   /help - SHOW THIS HELP
-  /settings - OPEN SETTINGS PANEL
+  /config - OPEN SETTINGS PANEL
   /apikey [key] - SET OPENAI API KEY
   /export-settings - BACKUP SETTINGS
   /reset-settings - RESTORE DEFAULTS
@@ -405,7 +405,7 @@ This project includes automated deployment:
 
 ### User Settings
 
-- Use the `/settings` command to access the visual settings panel
+- Use the `/config` command to access the visual settings panel
 - Choose from multiple themes: Classic Green, Amber, Blue, Matrix
 - Configure audio preferences including TTS, beeping, and dial-up sounds
 - Adjust AI behavior with temperature and token limits

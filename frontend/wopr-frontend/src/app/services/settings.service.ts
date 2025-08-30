@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { DEFAULT_SETTINGS, SettingsChangeEvent, WoprSettings } from '../models/settings.models';
 
 @Injectable({
@@ -22,6 +22,8 @@ export class SettingsService {
   constructor() {
     this.currentSettings = this.loadSettings();
     this.settingsSubject.next(this.currentSettings);
+    // Apply the current theme on service initialization
+    this.applyTheme(this.currentSettings.theme);
   }
 
   /**
@@ -333,10 +335,56 @@ export class SettingsService {
    */
   public setTheme(theme: 'classic' | 'green' | 'amber' | 'blue'): void {
     this.setSetting('theme', theme);
+    this.applyTheme(theme);
   }
 
   public getTheme(): string {
     return this.currentSettings.theme;
+  }
+
+  /**
+   * Apply theme to document root CSS custom properties
+   */
+  private applyTheme(theme: string): void {
+    const root = document.documentElement;
+    
+    switch (theme) {
+      case 'classic':
+        // Classic green CRT terminal
+        root.style.setProperty('--crt-green', '#00ff00');
+        root.style.setProperty('--crt-green-rgb', '0, 255, 0');
+        root.style.setProperty('--crt-dark-green', '#008000');
+        root.style.setProperty('--scan-line-opacity', '0.04');
+        break;
+        
+      case 'green':
+        // Matrix-style green
+        root.style.setProperty('--crt-green', '#00ff41');
+        root.style.setProperty('--crt-green-rgb', '0, 255, 65');
+        root.style.setProperty('--crt-dark-green', '#00aa2b');
+        root.style.setProperty('--scan-line-opacity', '0.06');
+        break;
+        
+      case 'amber':
+        // Amber terminal
+        root.style.setProperty('--crt-green', '#ffb000');
+        root.style.setProperty('--crt-green-rgb', '255, 176, 0');
+        root.style.setProperty('--crt-dark-green', '#cc8800');
+        root.style.setProperty('--scan-line-opacity', '0.05');
+        break;
+        
+      case 'blue':
+        // Blue matrix
+        root.style.setProperty('--crt-green', '#00bfff');
+        root.style.setProperty('--crt-green-rgb', '0, 191, 255');
+        root.style.setProperty('--crt-dark-green', '#0099cc');
+        root.style.setProperty('--scan-line-opacity', '0.05');
+        break;
+        
+      default:
+        // Fallback to classic
+        this.applyTheme('classic');
+    }
   }
 
   /**

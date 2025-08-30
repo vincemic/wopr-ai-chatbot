@@ -22,6 +22,7 @@ import { WoprToolsService } from '../services/wopr-tools.service';
 export class WoprChat implements OnInit, OnDestroy, AfterViewChecked {
   @ViewChild('chatContainer') chatContainer!: ElementRef;
   @ViewChild('messageInput') messageInput!: ElementRef;
+  @ViewChild(SettingsPanelComponent) settingsPanel!: SettingsPanelComponent;
 
   private destroy$ = new Subject<void>();
   
@@ -956,7 +957,7 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
         await this.crackLaunchCodes();
         break;
       
-      case '/settings':
+      case '/config':
         await this.showSettings();
         break;
       
@@ -997,7 +998,7 @@ BASIC COMMANDS:
 /launchcodes, /crack - Crack NORAD launch codes (authentic animation)
 
 SETTINGS MANAGEMENT:
-/settings     - View all current settings
+/config       - Open configuration panel
 /export-settings - Export settings to JSON file
 /reset-settings  - Reset all settings to defaults
 
@@ -1108,42 +1109,13 @@ ${this.hasOpenAIApiKey() ?
 
   // Settings management methods
   async showSettings() {
-    const settings = this.settingsService.getSettings();
-    const storageInfo = this.settingsService.getStorageInfo();
-    
-    const settingsText = `WOPR SETTINGS CONFIGURATION:
-
-AUDIO SETTINGS:
-- Text-to-Speech: ${settings.textToSpeechEnabled ? 'ENABLED' : 'DISABLED'}
-- Terminal Beeps: ${settings.beepEnabled ? 'ENABLED' : 'DISABLED'}
-- Dial-up Modem: ${settings.dialupEnabled ? 'ENABLED' : 'DISABLED'}
-- Computer Beeps: ${settings.tensionMusicEnabled ? 'ENABLED' : 'DISABLED'}
-
-API CONFIGURATION:
-- OpenAI API Key: ${this.getMaskedApiKey()}
-
-DISPLAY SETTINGS:
-- Theme: ${settings.theme.toUpperCase()}
-- Terminal Speed: ${settings.terminalSpeed}ms per character
-- Reduced Motion: ${settings.reducedMotion ? 'ENABLED' : 'DISABLED'}
-- High Contrast: ${settings.highContrast ? 'ENABLED' : 'DISABLED'}
-
-SYSTEM SETTINGS:
-- Auto Connect: ${settings.autoConnect ? 'ENABLED' : 'DISABLED'}
-- Function Calling: ${settings.enableFunctionCalling ? 'ENABLED' : 'DISABLED'}
-- Telemetry: ${settings.enableTelemetry ? 'ENABLED' : 'DISABLED'}
-
-STORAGE INFO:
-- Data Size: ${storageInfo.size} bytes
-- Version: ${storageInfo.version}
-- Last Used: ${new Date(storageInfo.lastUsed).toISOString()}
-
-AVAILABLE COMMANDS:
-/settings - Show this settings overview
-/export-settings - Export settings to text
-/reset-settings - Reset all settings to defaults`;
-
-    await this.typeMessage(settingsText, 'system');
+    // Show the visual settings panel
+    if (this.settingsPanel) {
+      this.settingsPanel.isVisible = true;
+      await this.typeMessage('SETTINGS PANEL ACTIVATED. CONFIGURE YOUR WOPR EXPERIENCE.', 'system');
+    } else {
+      await this.typeMessage('ERROR: SETTINGS PANEL NOT AVAILABLE. TRY RELOADING THE TERMINAL.', 'system');
+    }
   }
 
   async exportSettings() {
