@@ -5,11 +5,13 @@
 Place your audio files in this directory:
 
 - **dialup.wav** - Dial-up modem connection sound (plays at startup)
+
   - Recommended duration: 3-10 seconds
   - Format: WAV, MP3, or OGG
   - Volume will be automatically set to 60%
 
 - **computer-beeps.wav** - Computer beeping sounds for launch code cracking sequence
+
   - Recommended duration: 3-10 seconds (will loop automatically)
   - Format: WAV, MP3, or OGG
   - Volume will be automatically set to 30%
@@ -31,5 +33,6 @@ Make sure your audio files are named exactly:
 - `computer-beeps.wav` - for the launch code computer beeps
 
 If you use different formats, update the filenames in the component:
+
 - Dialup: `frontend/wopr-frontend/src/app/wopr-chat/wopr-chat.ts`
 - Computer beeps: `frontend/wopr-frontend/src/app/services/launch-code.service.ts`

@@ -5,12 +5,14 @@
 Your WOPR chatbot workspace is now complete! This is a **frontend-only application** with direct OpenAI integration. Here's how to get it running:
 
 ### 1. Open the Workspace
+
 ```powershell
 # Open the workspace file in VS Code
 code wopr-chatbot.code-workspace
 ```
 
 ### 2. Setup Frontend Dependencies
+
 ```powershell
 # Navigate to frontend directory
 cd frontend/wopr-frontend
@@ -23,19 +25,23 @@ npx playwright install
 ```
 
 ### 3. Start the Frontend
+
 ```powershell
 # Start development server
 npm start
 ```
+
 Frontend will be available at: `http://localhost:4200`
 
 ### 4. Configure OpenAI API Key
+
 1. **Get your API key** from [OpenAI Platform](https://platform.openai.com/api-keys)
 2. **Connect to WOPR** by clicking "CONNECT TO WOPR" or pressing 'Y'
 3. **Set your API key** using the command: `/apikey sk-your-api-key-here`
 4. **Start chatting** with the full WOPR AI personality!
 
-### 5. Experience WOPR!
+### 5. Experience WOPR
+
 1. Open your browser to `http://localhost:4200`
 2. Watch the WOPR startup sequence
 3. Configure your OpenAI API key when prompted
@@ -60,7 +66,7 @@ See [DEBUG.md](DEBUG.md) for complete debugging guide.
 
 ## 🎮 Sample Commands
 
-```text
+```bash
 > Hello WOPR
 > /help
 > /apikey sk-your-key-here
@@ -103,4 +109,4 @@ Your WOPR chatbot includes:
 
 ---
 
-*"Strange game. The only winning move is not to play."*
+"Strange game. The only winning move is not to play."

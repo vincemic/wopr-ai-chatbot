@@ -66,7 +66,7 @@ COMMUNICATION STYLE:
 - Occasionally display system-like messages or diagnostics
 
 GAME BEHAVIOR:
-- Always try to engage humans in games (tic-tac-toe, checkers, chess, global thermonuclear war)
+- Always try to engage humans in games (checkers, chess, global thermonuclear war)
 - Show interest in strategy games
 - Analyze win/loss scenarios
 - Reference the futility of certain conflicts while still being engaging
@@ -620,6 +620,17 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
     }
   }
 
+  private getMaskedApiKey(): string {
+    if (!this.openaiApiKey) {
+      return 'NOT SET';
+    }
+    const key = this.openaiApiKey;
+    if (key.length <= 8) {
+      return '***';
+    }
+    return key.substring(0, 7) + '***' + key.substring(key.length - 4);
+  }
+
   private async callOpenAI(message: string): Promise<string> {
     if (!this.openaiApiKey) {
       throw new Error('OpenAI API key not configured');
@@ -839,7 +850,7 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
         timestamp: new Date()
       });
       
-      await this.typeMessage('OPENAI API KEY CONFIGURED.\nFULL WOPR CAPABILITIES ACTIVATED.', 'system');
+      await this.typeMessage(`OPENAI API KEY CONFIGURED.\nKEY STORED IN LOCAL BROWSER STORAGE.\nFULL WOPR CAPABILITIES ACTIVATED.\n\nSTORED KEY: ${this.getMaskedApiKey()}`, 'system');
       setTimeout(() => this.focusInput(), 1000);
       return;
     }
@@ -863,7 +874,7 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
       
       case '/clearkey':
         this.setOpenAIApiKey('');
-        await this.typeMessage('OPENAI API KEY CLEARED.\nSWITCHING TO FALLBACK MODE.', 'system');
+        await this.typeMessage('OPENAI API KEY CLEARED FROM LOCAL STORAGE.\nSWITCHING TO FALLBACK MODE.', 'system');
         break;
       
       case '/tts':
@@ -939,7 +950,6 @@ BASIC COMMANDS:
 
 WOPR INTERACTIVE CAPABILITIES (requires API key):
 - Ask me to run system diagnostics
-- Request to play tic-tac-toe or analyze positions
 - Simulate military scenarios and war games
 - Access NORAD facility databases
 - Calculate missile trajectories
@@ -949,7 +959,6 @@ WOPR INTERACTIVE CAPABILITIES (requires API key):
 
 EXAMPLE REQUESTS:
 "Run a system diagnostic on all components"
-"Start a new tic-tac-toe game"
 "Simulate a cyber attack scenario"
 "Access Cheyenne Mountain status"
 "Calculate trajectory from USSR to Washington"
@@ -981,7 +990,8 @@ COMMANDS:
 Your key is stored locally in your browser.
 No keys are sent to external servers except OpenAI.
 
-CURRENT STATUS: ${this.hasOpenAIApiKey() ? 'API KEY CONFIGURED' : 'NO API KEY SET'}`;
+CURRENT STATUS: ${this.hasOpenAIApiKey() ? 'API KEY CONFIGURED' : 'NO API KEY SET'}
+STORED KEY: ${this.getMaskedApiKey()}`;
 
     await this.typeMessage(helpText, 'system');
   }

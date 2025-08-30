@@ -36,35 +36,6 @@ export class WoprToolsService {
         }
       },
       {
-        name: 'play_tic_tac_toe',
-        description: 'Start or make a move in tic-tac-toe game',
-        parameters: {
-          type: 'object',
-          properties: {
-            action: {
-              type: 'string',
-              enum: ['new_game', 'make_move', 'analyze_position'],
-              description: 'Action to perform in the game'
-            },
-            position: {
-              type: 'number',
-              description: 'Position to place mark (1-9) for make_move action',
-              minimum: 1,
-              maximum: 9
-            },
-            board: {
-              type: 'array',
-              description: 'Current board state for analysis',
-              items: {
-                type: 'array',
-                items: { type: 'string' }
-              }
-            }
-          },
-          required: ['action']
-        }
-      },
-      {
         name: 'simulate_war_scenario',
         description: 'Run military defense scenario simulations',
         parameters: {
@@ -201,10 +172,6 @@ export class WoprToolsService {
         output = this.runSystemDiagnostic(parsedArgs.component);
         break;
 
-      case 'play_tic_tac_toe':
-        output = this.playTicTacToe(parsedArgs);
-        break;
-
       case 'simulate_war_scenario':
         output = this.simulateWarScenario(parsedArgs);
         break;
@@ -275,43 +242,6 @@ export class WoprToolsService {
     output += `DIAGNOSTIC COMPLETE - ${new Date().toISOString()}`;
     
     return output;
-  }
-
-  private playTicTacToe(params: any): string {
-    if (params.action === 'new_game') {
-      const newBoard = [
-        [' ', ' ', ' '],
-        [' ', ' ', ' '],
-        [' ', ' ', ' ']
-      ];
-      
-      return `NEW TIC-TAC-TOE GAME INITIALIZED
-
- 1 | 2 | 3 
------------
- 4 | 5 | 6 
------------
- 7 | 8 | 9 
-
-YOU ARE X, I AM O.
-MAKE YOUR MOVE BY CALLING play_tic_tac_toe WITH POSITION 1-9.`;
-    }
-    
-    if (params.action === 'analyze_position') {
-      return `ANALYZING CURRENT POSITION...
-
-PROBABILITY MATRIX:
-- HUMAN VICTORY: 23.7%
-- WOPR VICTORY: 45.2% 
-- STALEMATE: 31.1%
-
-STRATEGIC ASSESSMENT: 
-THE ONLY WINNING MOVE IS NOT TO PLAY.
-BUT SINCE WE ARE PLAYING, I CALCULATE MY OPTIMAL STRATEGY.`;
-    }
-
-    return `TIC-TAC-TOE FUNCTION EXECUTED
-WOULD YOU LIKE TO START A NEW GAME?`;
   }
 
   private simulateWarScenario(params: any): string {
