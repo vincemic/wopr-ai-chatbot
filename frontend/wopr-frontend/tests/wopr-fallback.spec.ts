@@ -97,8 +97,8 @@ test.describe('WOPR Fallback System', () => {
       await input.press('Enter');
       
       // Should get a WOPR-style fallback response
-      await expect(page.locator('.wopr-message').last()).toContainText('Running on backup protocols', { timeout: 10000 });
-      await expect(page.locator('.wopr-message').last()).toContainText('Shall we play a game?');
+      await expect(page.locator('.message').last()).toContainText('Running on backup protocols', { timeout: 10000 });
+      await expect(page.locator('.message').last()).toContainText('Shall we play a game?');
       
       // Verify user message was displayed
       await expect(page.locator('.user-message').last()).toContainText('Hello WOPR');
@@ -124,9 +124,9 @@ test.describe('WOPR Fallback System', () => {
       await input.press('Enter');
       
       // Should get a WOPR-style fallback response
-      await expect(page.locator('.wopr-message').last()).toContainText('Primary cognitive matrix experiencing difficulties');
-      await expect(page.locator('.wopr-message').last()).toContainText('DEFCON 2 status');
-      await expect(page.locator('.wopr-message').last()).toContainText('nice game of chess');
+      await expect(page.locator('.message').last()).toContainText('Primary cognitive matrix experiencing difficulties');
+      await expect(page.locator('.message').last()).toContainText('DEFCON 2 status');
+      await expect(page.locator('.message').last()).toContainText('nice game of chess');
       
       // Verify user message was displayed
       await expect(page.locator('.user-message').last()).toContainText('Check system status');
@@ -152,9 +152,9 @@ test.describe('WOPR Fallback System', () => {
       await input.press('Enter');
       
       // Should get timeout fallback message
-      await expect(page.locator('.wopr-message').last()).toContainText('NETWORK TIMEOUT', { timeout: 10000 });
+      await expect(page.locator('.message').last()).toContainText('NETWORK TIMEOUT', { timeout: 10000 });
       // Wait for typing animation to complete before checking the end of the message
-      await expect(page.locator('.wopr-message').last()).toContainText('Your move, human', { timeout: 15000 });
+      await expect(page.locator('.message').last()).toContainText('Your move, human', { timeout: 15000 });
     });
   });
 
@@ -181,7 +181,7 @@ test.describe('WOPR Fallback System', () => {
       await page.waitForTimeout(3000);
       
       // Should use client-side fallback messages
-      const lastMessage = page.locator('.wopr-message').last();
+      const lastMessage = page.locator('.message').last();
       await expect(lastMessage).toBeVisible({ timeout: 10000 });
       
       // Check that it contains either a client-side fallback message OR shows error handling
@@ -225,7 +225,7 @@ test.describe('WOPR Fallback System', () => {
       await input.press('Enter');
       
       // Should use client-side fallback
-      const lastMessage = page.locator('.wopr-message').last();
+      const lastMessage = page.locator('.message').last();
       await expect(lastMessage).toBeVisible({ timeout: 10000 });
       
       // Verify it handles the error gracefully - system responds even on network failure
@@ -251,17 +251,17 @@ test.describe('WOPR Fallback System', () => {
         await input.press('Enter');
         
         // Wait for response
-        await expect(page.locator('.wopr-message').nth(-1)).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('.message').nth(-1)).toBeVisible({ timeout: 10000 });
         
         // Verify each response is valid (either fallback or error handling)
-        const messageText = await page.locator('.wopr-message').last().textContent();
+        const messageText = await page.locator('.message').last().textContent();
         expect(messageText).toBeTruthy();
         expect(messageText!.length).toBeGreaterThan(5); // Should have some content
       }
 
       // Verify we have 3 user messages and 3 WOPR responses (plus startup messages)
       const userMessages = page.locator('.user-message');
-      const woprMessages = page.locator('.wopr-message');
+      const woprMessages = page.locator('.message');
       
       await expect(userMessages).toHaveCount(3);
       // WOPR messages include startup sequence + 3 fallback responses
@@ -302,7 +302,7 @@ test.describe('WOPR Fallback System', () => {
       await input.press('Enter');
       
       // Should get a client-side fallback response
-      await expect(page.locator('.wopr-message').last()).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('.message').last()).toBeVisible({ timeout: 10000 });
     });
 
     test('should recover gracefully when backend comes back online', async ({ page }) => {
@@ -333,8 +333,8 @@ test.describe('WOPR Fallback System', () => {
       await input.press('Enter');
       
       // Should get fallback response
-      await expect(page.locator('.wopr-message').last()).toBeVisible({ timeout: 10000 });
-      const fallbackText = await page.locator('.wopr-message').last().textContent();
+      await expect(page.locator('.message').last()).toBeVisible({ timeout: 10000 });
+      const fallbackText = await page.locator('.message').last().textContent();
       
       // Now bring backend back online
       backendAvailable = true;
@@ -344,10 +344,10 @@ test.describe('WOPR Fallback System', () => {
       await input.press('Enter');
       
       // Should get normal backend response
-      await expect(page.locator('.wopr-message').last()).toContainText('WOPR systems fully operational', { timeout: 10000 });
+      await expect(page.locator('.message').last()).toContainText('WOPR systems fully operational', { timeout: 10000 });
       
       // Verify the two responses are different (fallback vs normal)
-      const normalText = await page.locator('.wopr-message').last().textContent();
+      const normalText = await page.locator('.message').last().textContent();
       expect(fallbackText).not.toBe(normalText);
     });
   });
@@ -391,8 +391,8 @@ test.describe('WOPR Fallback System', () => {
       await input.press('Enter');
       
       // Should still use client-side fallback
-      await expect(page.locator('.wopr-message').last()).toBeVisible({ timeout: 10000 });
-      const messageText = await page.locator('.wopr-message').last().textContent();
+      await expect(page.locator('.message').last()).toBeVisible({ timeout: 10000 });
+      const messageText = await page.locator('.message').last().textContent();
       expect(messageText).toBeTruthy();
       expect(messageText!.length).toBeGreaterThan(20);
     });
@@ -416,12 +416,12 @@ test.describe('WOPR Fallback System', () => {
       await messageInput.press('Enter');
 
       // Wait for response
-      await expect(page.locator('.wopr-message').last()).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('.message').last()).toBeVisible({ timeout: 10000 });
       
       // Wait for typewriter effect to complete (our messages are multi-line and longer)
       await page.waitForTimeout(5000);
       
-      const response = await page.locator('.wopr-message').last().textContent();
+      const response = await page.locator('.message').last().textContent();
       
       // Debug: Log response for this input
       console.log(`Input: "${input}" -> Response: "${response}" (${response?.length} chars)`);
@@ -446,13 +446,13 @@ test.describe('WOPR Fallback System', () => {
       
       // Wait for both user message and fallback response to appear
       await expect(page.locator('.user-message').last()).toBeVisible({ timeout: 5000 });
-      await expect(page.locator('.wopr-message').last()).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('.message').last()).toBeVisible({ timeout: 10000 });
       
       // Wait a bit more for typewriter effect to complete
       await page.waitForTimeout(3000);
       
       // Get the last WOPR message (fallback response)
-      const response = await page.locator('.wopr-message').last().textContent();
+      const response = await page.locator('.message').last().textContent();
       
       // Debug: Log the actual response
       console.log('Actual fallback response:', response);
