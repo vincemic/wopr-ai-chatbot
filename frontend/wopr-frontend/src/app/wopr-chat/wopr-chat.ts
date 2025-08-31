@@ -534,14 +534,7 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
       'WOPR SYSTEM INITIALIZING...',
       'CONNECTING TO NORAD MAINFRAME...',
       'DEFCON SYSTEMS ONLINE',
-      '',
-      'TYPE /HELP FOR COMMAND LIST.',
       ''
-    ];
-    
-    // WOPR greeting messages
-    const woprMessages = [
-      'GREETINGS PROFESSOR FALKEN.'
     ];
     
     // Play system messages first
@@ -549,11 +542,68 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
       await this.typeMessage(message, 'system');
       await this.delay(message === '' ? 500 : 1000);
     }
-    
-    // Then play WOPR greeting
-    for (const message of woprMessages) {
-      await this.typeMessage(message, 'assistant');
+
+    // Check API key and validate connection before showing normal greeting
+    const hasApiKey = this.settingsService.hasApiKey();
+    let isApiKeyValid = false;
+
+    if (hasApiKey) {
+      await this.typeMessage('VERIFYING AI CORE ACCESS...', 'system');
       await this.delay(1000);
+      
+      try {
+        // Validate the API key
+        isApiKeyValid = await this.settingsService.validateApiKey();
+        
+        if (isApiKeyValid) {
+          await this.typeMessage('AI CORE CONNECTION ESTABLISHED', 'system');
+          await this.delay(500);
+          await this.typeMessage('TYPE /HELP FOR COMMAND LIST.', 'system');
+          await this.delay(1000);
+          
+          // Show normal WOPR greeting
+          await this.typeMessage('GREETINGS PROFESSOR FALKEN.', 'assistant');
+        } else {
+          await this.typeMessage('ERROR: AI CORE ACCESS DENIED', 'system');
+          await this.delay(500);
+          await this.typeMessage('INVALID API CREDENTIALS DETECTED', 'system');
+          await this.delay(1000);
+          
+          // Show system unavailable message
+          await this.typeMessage('WOPR CORE SYSTEMS UNAVAILABLE', 'system');
+          await this.delay(800);
+          await this.typeMessage('OPENAI API KEY IS INVALID OR EXPIRED', 'system');
+          await this.delay(800);
+          await this.typeMessage('USE /apikey COMMAND TO UPDATE CREDENTIALS', 'system');
+          await this.delay(800);
+          await this.typeMessage('TYPE /help FOR FULL SETUP INSTRUCTIONS', 'system');
+        }
+      } catch (error) {
+        console.error('WOPR: API validation error during startup', error);
+        await this.typeMessage('WARNING: NETWORK CONNECTION ISSUE', 'system');
+        await this.delay(500);
+        await this.typeMessage('UNABLE TO VERIFY AI CORE ACCESS', 'system');
+        await this.delay(1000);
+        
+        // Show system with uncertainty
+        await this.typeMessage('WOPR SYSTEMS PARTIALLY AVAILABLE', 'system');
+        await this.delay(800);
+        await this.typeMessage('NETWORK CONNECTIVITY REQUIRED FOR VALIDATION', 'system');
+        await this.delay(800);
+        await this.typeMessage('TYPE /status TO RETRY CONNECTION CHECK', 'system');
+      }
+    } else {
+      await this.typeMessage('WARNING: NO AI CORE ACCESS CONFIGURED', 'system');
+      await this.delay(1000);
+      
+      // Show system unavailable message
+      await this.typeMessage('WOPR CORE SYSTEMS UNAVAILABLE', 'system');
+      await this.delay(800);
+      await this.typeMessage('OPENAI API KEY REQUIRED FOR FULL ACCESS', 'system');
+      await this.delay(800);
+      await this.typeMessage('USE /apikey COMMAND TO CONFIGURE CREDENTIALS', 'system');
+      await this.delay(800);
+      await this.typeMessage('TYPE /help FOR SETUP INSTRUCTIONS', 'system');
     }
   }
 
@@ -634,27 +684,24 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
       let response: string;
 
       if (this.hasOpenAIApiKey()) {
-        // Use OpenAI directly
-        response = await this.callOpenAI(userMessage);
-      } else {
-        // No API key configured - prompt user or use fallback
-        if (this.messages.length === 1) { // First message without API key
-          response = `GREETINGS PROFESSOR FALKEN.\n\nTO USE MY FULL CAPABILITIES, YOU MUST CONFIGURE AN OPENAI API KEY.\n\nTYPE "/help" FOR AVAILABLE COMMANDS, INCLUDING API KEY SETUP.\n\nORDERS, PROFESSOR?`;
+        // Validate API key before using it
+        const isValidKey = await this.settingsService.validateApiKey();
+        if (!isValidKey) {
+          response = `API KEY VALIDATION FAILED.\n\nCURRENT KEY IS INVALID OR EXPIRED.\n\nUSE "/apikey [your-key]" TO UPDATE CREDENTIALS.\n\nTYPE "/help" FOR FULL SETUP INSTRUCTIONS.`;
+          // Type as system message since WOPR can't respond without valid API
+          await this.typeMessage(response, 'system');
         } else {
-          // Client-side fallback for subsequent messages
-          const fallbackResponses = [
-            "INSUFFICIENT COMPUTING POWER FOR FULL RESPONSE.\nAPI KEY REQUIRED FOR WOPR CORE ACCESS.",
-            "DEFENSIVE SYSTEMS OFFLINE.\nREQUIRE OPENAI CREDENTIALS TO PROCEED.",
-            "THE ONLY WINNING MOVE IS... TO CONFIGURE YOUR API KEY.\nTYPE /help FOR ASSISTANCE.",
-            "SHALL WE PLAY A GAME?\nFIRST, LET'S CONFIGURE YOUR OPENAI ACCESS.",
-            "ANALYZING GLOBAL THERMONUCLEAR OPTIONS...\nERROR: API AUTHENTICATION REQUIRED."
-          ];
-          response = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+          // Use OpenAI with valid key
+          response = await this.callOpenAI(userMessage);
+          // Type the WOPR response - explicitly set as assistant role to ensure it shows as "WOPR:"
+          await this.typeMessage(response, 'assistant');
         }
+      } else {
+        // No API key configured - provide helpful guidance from system
+        response = `WOPR CORE SYSTEMS UNAVAILABLE.\n\nOPENAI API KEY REQUIRED FOR FULL ACCESS.\n\nUSE "/apikey [your-key]" TO CONFIGURE CREDENTIALS.\n\nTYPE "/help" FOR COMPLETE SETUP INSTRUCTIONS.\n\nLIMITED FUNCTIONS AVAILABLE IN FALLBACK MODE.`;
+        // Type as system message since WOPR isn't available
+        await this.typeMessage(response, 'system');
       }
-
-      // Type the WOPR response - explicitly set as assistant role to ensure it shows as "WOPR:"
-      await this.typeMessage(response, 'assistant');
 
     } catch (error: any) {
       console.error('Chat error:', error);
@@ -953,10 +1000,11 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
     
     const utterance = new SpeechSynthesisUtterance(text);
     
-    // Configure WOPR voice settings for computer-like speech
-    utterance.rate = 0.7;        // Slower, more deliberate
-    utterance.pitch = 0.4;       // Lower pitch, more robotic
-    utterance.volume = 0.8;      // Clear volume
+    // Configure WOPR voice settings from user preferences
+    const settings = this.settingsService.getSettings();
+    utterance.rate = settings.speechRate;        // User-configurable rate
+    utterance.pitch = settings.speechPitch;      // User-configurable pitch
+    utterance.volume = settings.speechVolume;    // User-configurable volume
     
     // Use voice selection from settings
     const selectedVoice = this.settingsService.getBestVoiceForWopr();
@@ -982,7 +1030,32 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
         timestamp: new Date()
       });
       
-      await this.typeMessage(`OPENAI API KEY CONFIGURED.\nKEY STORED IN LOCAL BROWSER STORAGE.\nFULL WOPR CAPABILITIES ACTIVATED.\n\nSTORED KEY: ${this.getMaskedApiKey()}`, 'system');
+      // Validate the new API key immediately
+      await this.typeMessage('VALIDATING NEW API KEY...', 'system');
+      
+      try {
+        const isValid = await this.settingsService.validateApiKey();
+        
+        if (isValid) {
+          await this.typeMessage(`OPENAI API KEY CONFIGURED SUCCESSFULLY.\nKEY VALIDATION: PASSED\nFULL WOPR CAPABILITIES ACTIVATED.\n\nSTORED KEY: ${this.getMaskedApiKey()}`, 'system');
+          
+          // Add a small delay before WOPR greeting
+          await this.delay(1000);
+          
+          // WOPR can now greet the user since API is working
+          await this.typeMessage('GREETINGS PROFESSOR FALKEN.', 'assistant');
+          await this.delay(800);
+          await this.typeMessage('WOPR SYSTEMS FULLY OPERATIONAL.', 'assistant');
+          await this.delay(800);
+          await this.typeMessage('SHALL WE PLAY A GAME?', 'assistant');
+        } else {
+          await this.typeMessage(`OPENAI API KEY STORED BUT VALIDATION FAILED.\nKEY VALIDATION: FAILED\nPLEASE VERIFY YOUR API KEY IS CORRECT.\n\nSTORED KEY: ${this.getMaskedApiKey()}`, 'system');
+        }
+      } catch (error) {
+        console.error('WOPR: API key validation error', error);
+        await this.typeMessage(`OPENAI API KEY STORED.\nVALIDATION FAILED: NETWORK ERROR\nKEY WILL BE TESTED ON FIRST USE.\n\nSTORED KEY: ${this.getMaskedApiKey()}`, 'system');
+      }
+      
       setTimeout(() => this.focusInput(), 1000);
       return;
     }
@@ -1124,6 +1197,20 @@ SETTINGS MANAGEMENT:
   }
 
   async showApiKeyHelp() {
+    const hasKey = this.hasOpenAIApiKey();
+    let validationStatus = 'UNKNOWN';
+    
+    if (hasKey) {
+      await this.typeMessage('VALIDATING API KEY...', 'system');
+      try {
+        const isValid = await this.settingsService.validateApiKey();
+        validationStatus = isValid ? 'VALID' : 'INVALID';
+      } catch (error) {
+        console.error('WOPR: Help validation error', error);
+        validationStatus = 'NETWORK ERROR';
+      }
+    }
+
     const helpText = `OPENAI API KEY CONFIGURATION:
 
 To enable full WOPR AI capabilities, you need an OpenAI API key.
@@ -1143,19 +1230,34 @@ COMMANDS:
 Your key is stored locally in your browser.
 No keys are sent to external servers except OpenAI.
 
-CURRENT STATUS: ${this.hasOpenAIApiKey() ? 'API KEY CONFIGURED' : 'NO API KEY SET'}
-STORED KEY: ${this.getMaskedApiKey()}`;
+CURRENT STATUS: ${hasKey ? 'API KEY CONFIGURED' : 'NO API KEY SET'}
+STORED KEY: ${this.getMaskedApiKey()}
+KEY VALIDATION: ${validationStatus}`;
 
     await this.typeMessage(helpText, 'system');
   }
 
   async showStatus() {
-    const functionsAvailable = this.hasOpenAIApiKey() ? this.woprTools.getAvailableTools().length : 0;
+    const hasKey = this.hasOpenAIApiKey();
+    const functionsAvailable = hasKey ? this.woprTools.getAvailableTools().length : 0;
+    
+    let apiKeyStatus = 'NOT CONFIGURED';
+    if (hasKey) {
+      await this.typeMessage('VALIDATING API CREDENTIALS...', 'system');
+      try {
+        const isValid = await this.settingsService.validateApiKey();
+        apiKeyStatus = isValid ? 'VALID & CONNECTED' : 'INVALID/EXPIRED';
+      } catch (error) {
+        console.error('WOPR: Status validation error', error);
+        apiKeyStatus = 'NETWORK ERROR';
+      }
+    }
     
     const statusText = `WOPR SYSTEM STATUS:
 
 CONNECTION: ${this.isConnecting ? 'ESTABLISHING...' : 'ONLINE'}
-AI CORE: ${this.hasOpenAIApiKey() ? 'OPENAI CONNECTED' : 'FALLBACK MODE'}
+AI CORE: ${hasKey ? (apiKeyStatus === 'VALID & CONNECTED' ? 'OPENAI CONNECTED' : 'ACCESS DENIED') : 'FALLBACK MODE'}
+API KEY: ${apiKeyStatus}
 FUNCTION CALLS: ${functionsAvailable > 0 ? `${functionsAvailable} TOOLS AVAILABLE` : 'DISABLED'}
 VOICE SYNTHESIS: ${this.textToSpeechEnabled ? 'ENABLED' : 'DISABLED'}
 TERMINAL AUDIO: ${this.beepEnabled ? 'ENABLED' : 'DISABLED'}
@@ -1165,7 +1267,7 @@ CURRENT GAME: ${this.gameState?.currentGame || 'NONE'}
 ACTIVE SESSIONS: 1
 SYSTEM TIME: ${new Date().toISOString()}
 
-${this.hasOpenAIApiKey() ? 
+${hasKey && apiKeyStatus === 'VALID & CONNECTED' ? 
   'ADVANCED CAPABILITIES: System diagnostics, war games, NORAD access, trajectory calculations' :
   'USE /apikey TO CONFIGURE OPENAI FOR FULL CAPABILITIES'}`;
 

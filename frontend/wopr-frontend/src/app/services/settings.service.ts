@@ -37,15 +37,16 @@ export class SettingsService {
       if (storedSettings) {
         const parsed = JSON.parse(storedSettings) as WoprSettings;
         
-        // Migrate settings if version mismatch
+        // Migrate settings if version mismatch or missing properties
         const migrated = this.migrateSettings(parsed);
         
-        // Merge with defaults to ensure all properties exist
+        // Ensure all properties exist by merging with defaults first
         const settings = { ...DEFAULT_SETTINGS, ...migrated };
         
         // Update last used timestamp
         settings.lastUsed = new Date();
         
+        console.log('WOPR Settings: Loaded and migrated settings from localStorage');
         return settings;
       } else {
         // Check for legacy API key and migrate
@@ -62,6 +63,7 @@ export class SettingsService {
         
         // Save initial settings
         this.saveSettings(settings);
+        console.log('WOPR Settings: Created new settings with defaults');
         return settings;
       }
     } catch (error) {
@@ -80,7 +82,7 @@ export class SettingsService {
     if (!settings.version) {
       console.log('WOPR Settings: Migrating pre-versioned settings');
       
-      // Ensure all new properties have defaults
+      // Ensure all new properties have defaults by merging with defaults first
       const migrated = {
         ...DEFAULT_SETTINGS,
         ...settings,
@@ -94,7 +96,7 @@ export class SettingsService {
     if (settings.version !== this.SETTINGS_VERSION) {
       console.log(`WOPR Settings: Migrating from version ${settings.version} to ${this.SETTINGS_VERSION}`);
       
-      // For now, just merge with defaults and update version
+      // Merge with defaults to ensure all properties exist, then apply existing settings
       const migrated = {
         ...DEFAULT_SETTINGS,
         ...settings,
@@ -104,7 +106,12 @@ export class SettingsService {
       return migrated;
     }
     
-    return settings;
+    // Even for current version, ensure all properties exist
+    // This handles cases where new properties were added in the same version
+    return {
+      ...DEFAULT_SETTINGS,
+      ...settings
+    };
   }
 
   /**
@@ -331,6 +338,31 @@ export class SettingsService {
   }
 
   /**
+   * Validate OpenAI API key by making a test call
+   */
+  public async validateApiKey(): Promise<boolean> {
+    const apiKey = this.getApiKey();
+    if (!apiKey) {
+      return false;
+    }
+
+    try {
+      const response = await fetch('https://api.openai.com/v1/models', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      return response.ok;
+    } catch (error) {
+      console.warn('WOPR: API key validation failed - network or server error', error);
+      return false;
+    }
+  }
+
+  /**
    * Theme management
    */
   public setTheme(theme: 'classic' | 'green' | 'amber' | 'blue'): void {
@@ -409,6 +441,66 @@ export class SettingsService {
 
   public getSpeechVoice(): string {
     return this.currentSettings.speechVoice;
+  }
+
+  public setSpeechVolume(volume: number): void {
+    // Clamp volume between 0.0 and 1.0
+    const clampedVolume = Math.max(0.0, Math.min(1.0, volume));
+    this.setSetting('speechVolume', clampedVolume);
+  }
+
+  public getSpeechVolume(): number {
+    return this.currentSettings.speechVolume;
+  }
+
+  public setSpeechRate(rate: number): void {
+    // Clamp rate between 0.1 and 10.0
+    const clampedRate = Math.max(0.1, Math.min(10.0, rate));
+    this.setSetting('speechRate', clampedRate);
+  }
+
+  public getSpeechRate(): number {
+    return this.currentSettings.speechRate;
+  }
+
+  public setSpeechPitch(pitch: number): void {
+    // Clamp pitch between 0.0 and 2.0
+    const clampedPitch = Math.max(0.0, Math.min(2.0, pitch));
+    this.setSetting('speechPitch', clampedPitch);
+  }
+
+  public getSpeechPitch(): number {
+    return this.currentSettings.speechPitch;
+  }
+
+  /**
+   * Font size management
+   */
+  public setFontSize(size: number): void {
+    // Clamp font size between 8px and 32px
+    const clampedSize = Math.max(8, Math.min(32, size));
+    this.setSetting('fontSize', clampedSize);
+  }
+
+  public getFontSize(): number {
+    return this.currentSettings.fontSize;
+  }
+
+  /**
+   * Debug mode management
+   */
+  public toggleDebugMode(): boolean {
+    const newValue = !this.currentSettings.debugMode;
+    this.setSetting('debugMode', newValue);
+    return newValue;
+  }
+
+  public setDebugMode(enabled: boolean): void {
+    this.setSetting('debugMode', enabled);
+  }
+
+  public getDebugMode(): boolean {
+    return this.currentSettings.debugMode;
   }
 
   public getAvailableVoices(): SpeechSynthesisVoice[] {
