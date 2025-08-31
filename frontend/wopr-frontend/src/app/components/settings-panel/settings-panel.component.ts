@@ -75,15 +75,30 @@ export class SettingsPanelComponent implements OnInit, OnDestroy {
     return this.settingsService.getAvailableVoices();
   }
 
+  onSpeechVolumeChange(volume: string) {
+    const volumeValue = parseFloat(volume);
+    this.settingsService.setSpeechVolume(volumeValue);
+  }
+
+  onSpeechRateChange(rate: string) {
+    const rateValue = parseFloat(rate);
+    this.settingsService.setSpeechRate(rateValue);
+  }
+
+  onSpeechPitchChange(pitch: string) {
+    const pitchValue = parseFloat(pitch);
+    this.settingsService.setSpeechPitch(pitchValue);
+  }
+
   private testVoice(voiceName: string) {
     // Test the selected voice with a short WOPR phrase
     if ('speechSynthesis' in window && this.settings.textToSpeechEnabled) {
       speechSynthesis.cancel(); // Stop any current speech
       
       const utterance = new SpeechSynthesisUtterance('VOICE TEST ACTIVE');
-      utterance.rate = 0.7;
-      utterance.pitch = 0.4;
-      utterance.volume = 0.8;
+      utterance.rate = this.settings.speechRate;
+      utterance.pitch = this.settings.speechPitch;
+      utterance.volume = this.settings.speechVolume;
       
       const selectedVoice = this.settingsService.getBestVoiceForWopr();
       if (selectedVoice) {

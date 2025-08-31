@@ -64,6 +64,42 @@
             </option>
           </select>
         </div>
+        
+        <div class="setting-item">
+          <label>Speech Volume: <span class="speed-value">{{ (settings.speechVolume * 100).toFixed(0) }}%</span></label>
+          <input type="range" 
+                 class="speed-slider"
+                 title="Adjust speech volume from 0% to 100%"
+                 min="0" 
+                 max="1" 
+                 step="0.1"
+                 [value]="settings.speechVolume"
+                 (input)="onSpeechVolumeChange($any($event.target).value)">
+        </div>
+        
+        <div class="setting-item">
+          <label>Speech Rate: <span class="speed-value">{{ settings.speechRate.toFixed(1) }}x</span></label>
+          <input type="range" 
+                 class="speed-slider"
+                 title="Adjust speech rate from 0.1x to 3.0x speed"
+                 min="0.1" 
+                 max="3.0" 
+                 step="0.1"
+                 [value]="settings.speechRate"
+                 (input)="onSpeechRateChange($any($event.target).value)">
+        </div>
+        
+        <div class="setting-item">
+          <label>Speech Pitch: <span class="speed-value">{{ settings.speechPitch.toFixed(1) }}</span></label>
+          <input type="range" 
+                 class="speed-slider"
+                 title="Adjust speech pitch from 0.0 to 2.0"
+                 min="0.0" 
+                 max="2.0" 
+                 step="0.1"
+                 [value]="settings.speechPitch"
+                 (input)="onSpeechPitchChange($any($event.target).value)">
+        </div>
       </div>
 
       <!-- API Configuration -->
