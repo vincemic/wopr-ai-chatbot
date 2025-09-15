@@ -22,6 +22,7 @@ export interface WoprSettings {
   enableFunctionCalling: boolean;
   enableTelemetry: boolean;
   debugMode: boolean; // Enable debug logging
+  useAiClassifier: boolean; // Use AI-powered content classification over heuristics
   
   // Accessibility Settings
   reducedMotion: boolean;
@@ -57,6 +58,7 @@ export const DEFAULT_SETTINGS: WoprSettings = {
   enableFunctionCalling: true,
   enableTelemetry: true,
   debugMode: false, // Disabled by default
+  useAiClassifier: true, // Use AI classifier by default for better accuracy
   
   // Accessibility Settings
   reducedMotion: false,

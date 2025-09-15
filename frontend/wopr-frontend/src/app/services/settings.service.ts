@@ -315,6 +315,12 @@ export class SettingsService {
     return newValue;
   }
 
+  public toggleAiClassifier(): boolean {
+    const newValue = !this.currentSettings.useAiClassifier;
+    this.setSetting('useAiClassifier', newValue);
+    return newValue;
+  }
+
   /**
    * API key management
    */

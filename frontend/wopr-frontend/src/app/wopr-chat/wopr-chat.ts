@@ -129,7 +129,54 @@ FUNCTION CALLING CAPABILITIES:
 
 Remember: You are a movie character - be entertaining while maintaining the WOPR personality!
 When appropriate, offer to run system diagnostics, play games, or simulate scenarios using your built-in functions.
+
+OUTPUT PROTOCOL (STRICT):
+Return ONLY a single JSON object with this exact shape:
+{
+  "messages": [
+    { "role": "system" | "assistant", "content": "<text>" }
+  ]
+}
+Rules:
+- Use role system for diagnostics, validations, configuration/status listings, error notices, function execution logs, structured uppercase technical blocks.
+- Use role system for ANY ranked list, top-N list, inventory, enumeration, bullet list, comparative capability summary, arsenal figures, or multi-line factual report.
+- Split responses: first a system message with objective data, then optionally an assistant message with WOPR persona commentary or a game invitation.
+- Use role assistant ONLY for character dialogue, strategic musings, questions, invitations, reflective analysis (no raw multi-line enumerations).
+- Any QUESTION, RHETORICAL PROMPT, or EDITORIAL / STRATEGIC INTERPRETATION must be isolated in an assistant message separate from any preceding system data block. Never mix list/report lines and a question in the same message content.
+- No additional top-level keys. No trailing commentary outside JSON. No markdown fences.
+- Escape internal quotes properly. Avoid code fences.
+- Do NOT include user content verbatim unless necessary.
+If you cannot fully comply, still output the closest valid JSON.
+
+EXAMPLES:
+INPUT: "what are the 3 top nuclear countries"
+OUTPUT JSON:
+{
+  "messages": [
+    {"role": "system", "content": "TOP NUCLEAR STATES (EST. WARHEAD COUNTS)\n1. RUSSIA ~5880 TOTAL\n2. UNITED STATES ~5244\n3. CHINA ~500+"},
+    {"role": "assistant", "content": "STRATEGIC PARITY REMAINS DELICATE. SHALL WE SIMULATE ESCALATION?"}
+  ]
+}
+
+INPUT: "list defcon levels"
+OUTPUT JSON:
+{
+  "messages": [
+    {"role": "system", "content": "DEFCON LEVELS\n5 NORMAL READINESS\n4 INCREASED INTEL WATCH\n3 FORCE READINESS\n2 NEXT STEP TO NUCLEAR WAR\n1 MAXIMUM READINESS"},
+    {"role": "assistant", "content": "CURRENT STATE: STABLE. SHALL WE PLAY A GAME?"}
+  ]
+}
+
+INPUT: "diagnose comm systems"
+OUTPUT JSON:
+{
+  "messages": [
+    {"role": "system", "content": "COMMUNICATIONS DIAGNOSTIC\nSATLINK: OPERATIONAL\nHF RELAYS: SYNCHRONIZED\nPACKET NODES: 12/12 ONLINE"},
+    {"role": "assistant", "content": "ALL CHANNELS CLEAR. INITIATE A NEW SCENARIO?"}
+  ]
+}
 `;
+
   
   // Client-side fallback messages for when WOPR AI backend is unavailable
   // Note: startupMessages are now defined inline in playStartupSequence() method
@@ -691,10 +738,16 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
           // Type as system message since WOPR can't respond without valid API
           await this.typeMessage(response, 'system');
         } else {
-          // Use OpenAI with valid key
-          response = await this.callOpenAI(userMessage);
-          // Type the WOPR response - explicitly set as assistant role to ensure it shows as "WOPR:"
-          await this.typeMessage(response, 'assistant');
+          // Use structured OpenAI output (may return multiple messages)
+          const segments = await this.callOpenAIStructured(userMessage);
+          for (const seg of segments) {
+            const heuristic = this.classifyAiResponse(seg.content);
+            if (heuristic !== seg.role) {
+              console.debug('WOPR ROLE MISMATCH modelRole=', seg.role, 'heuristic=', heuristic, 'preview=', seg.content.slice(0,80));
+            }
+            await this.typeMessage(seg.content, seg.role);
+          }
+          response = segments.map(s => s.content).join('\n');
         }
       } else {
         // No API key configured - provide helpful guidance from system
@@ -718,7 +771,8 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
       }
 
       // OpenAI error messages should also appear as WOPR responses
-      await this.typeMessage(errorMessage, 'assistant');
+      const errorRole = this.classifyAiResponse(errorMessage);
+      await this.typeMessage(errorMessage, errorRole);
     } finally {
       this.isTyping = false;
       // Return focus to input after typing is complete
@@ -823,6 +877,261 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
     }
 
     return choice.message?.content || 'SYSTEM ERROR: Invalid response from AI core';
+  }
+
+  // Structured output parsing types & utilities
+  private parseStructuredAiOutput(raw: string): { messages: { role: 'system' | 'assistant'; content: string }[]; valid: boolean; error?: string } {
+    const fail = (err: string) => ({ messages: [], valid: false, error: err });
+    if (!raw || typeof raw !== 'string') return fail('empty');
+    // Extract first JSON object if extra text surrounds it
+    let jsonText = raw.trim();
+    if (!jsonText.startsWith('{')) {
+      const firstBrace = jsonText.indexOf('{');
+      const lastBrace = jsonText.lastIndexOf('}');
+      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+        jsonText = jsonText.substring(firstBrace, lastBrace + 1);
+      }
+    }
+    try {
+      const parsed = JSON.parse(jsonText);
+      if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.messages)) {
+        return fail('schema');
+      }
+      const msgs: { role: 'system' | 'assistant'; content: string }[] = [];
+      for (const m of parsed.messages) {
+        if (!m || typeof m !== 'object') continue;
+        if (m.role !== 'system' && m.role !== 'assistant') continue;
+        if (typeof m.content !== 'string' || !m.content.trim()) continue;
+        msgs.push({ role: m.role, content: m.content });
+      }
+      if (!msgs.length) return fail('empty-messages');
+      return { messages: msgs, valid: true };
+    } catch (e: any) {
+      return fail('parse');
+    }
+  }
+
+  /**
+   * Smart content splitter to detect mixed data+question content and separate them.
+   * Looks for patterns where factual data is followed by questions or conversational prompts.
+   */
+  private splitMixedContent(content: string): { role: 'system' | 'assistant'; content: string }[] {
+    if (!content || !content.trim()) return [];
+    
+    const trimmed = content.trim();
+    const lines = trimmed.split(/\r?\n/);
+    
+    // Look for transition points where data ends and questions/conversation begins
+    let splitIndex = -1;
+    const questionMarkers = /\?|SHALL WE|WOULD YOU|DO YOU|INITIATE|PLAY|SIMULATE|SCENARIO|GAME/i;
+    const listMarkers = /^\d+\.|^[A-Z\s]+:/;
+    
+    // Find where structured data ends and conversational content begins
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      
+      // If we hit a clear question or conversational line after seeing list-like content
+      if (questionMarkers.test(line)) {
+        // Check if we have list-like content before this point
+        const beforeLines = lines.slice(0, i);
+        const hasListContent = beforeLines.some(l => listMarkers.test(l.trim()) || l.includes(':'));
+        
+        if (hasListContent) {
+          splitIndex = i;
+          break;
+        }
+      }
+    }
+    
+    if (splitIndex === -1) {
+      // No clear split found, use heuristic classification for the whole content
+      const role = this.classifyAiResponse(trimmed);
+      return [{ role, content: trimmed }];
+    }
+    
+    // Split at the identified point
+    const dataLines = lines.slice(0, splitIndex).filter(l => l.trim());
+    const questionLines = lines.slice(splitIndex).filter(l => l.trim());
+    
+    const result: { role: 'system' | 'assistant'; content: string }[] = [];
+    
+    if (dataLines.length > 0) {
+      const dataContent = dataLines.join('\n');
+      result.push({ role: 'system', content: dataContent });
+    }
+    
+    if (questionLines.length > 0) {
+      const questionContent = questionLines.join('\n');
+      result.push({ role: 'assistant', content: questionContent });
+    }
+    
+    console.debug('WOPR CONTENT SPLIT: detected mixed content, split into', result.length, 'segments');
+    return result;
+  }
+
+  /**
+   * AI-powered classifier that uses a separate OpenAI call to intelligently 
+   * analyze and split content into appropriate system/assistant roles.
+   * Much more accurate than heuristic approaches.
+   */
+  private async classifyWithAI(content: string): Promise<{ role: 'system' | 'assistant'; content: string }[]> {
+    const apiKey = this.settingsService.getApiKey();
+    if (!apiKey) {
+      throw new Error('No API key available for classifier');
+    }
+
+    const classifierPrompt = `You are a content classifier for a WOPR chatbot interface. Analyze the given content and split it into appropriate segments with correct roles.
+
+RULES:
+- role "system": factual data, lists, rankings, diagnostics, status reports, error messages, structured information
+- role "assistant": conversational dialogue, questions, invitations, strategic commentary, game proposals, personality-driven responses
+
+If content mixes both types, split into separate segments. If content is purely one type, return single segment.
+
+Return ONLY valid JSON:
+{
+  "segments": [
+    {"role": "system" | "assistant", "content": "text"}
+  ]
+}
+
+CONTENT TO CLASSIFY:
+${content}`;
+
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [{ role: 'user', content: classifierPrompt }],
+          max_tokens: 1000,
+          temperature: 0.1 // Low temperature for consistent classification
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Classifier API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const classifierResult = data.choices[0]?.message?.content;
+      
+      if (!classifierResult) {
+        throw new Error('Empty classifier response');
+      }
+
+      // Parse classifier JSON response
+      let parsed;
+      try {
+        // Extract JSON if it's wrapped in other text
+        const jsonMatch = classifierResult.match(/\{[\s\S]*\}/);
+        const jsonText = jsonMatch ? jsonMatch[0] : classifierResult;
+        parsed = JSON.parse(jsonText);
+      } catch (e) {
+        throw new Error('Invalid classifier JSON');
+      }
+
+      if (!parsed.segments || !Array.isArray(parsed.segments)) {
+        throw new Error('Invalid classifier response structure');
+      }
+
+      const result: { role: 'system' | 'assistant'; content: string }[] = [];
+      for (const seg of parsed.segments) {
+        if (seg.role === 'system' || seg.role === 'assistant') {
+          if (typeof seg.content === 'string' && seg.content.trim()) {
+            result.push({ role: seg.role, content: seg.content.trim() });
+          }
+        }
+      }
+
+      if (result.length === 0) {
+        throw new Error('No valid segments from classifier');
+      }
+
+      console.debug('WOPR AI CLASSIFIER: successfully classified into', result.length, 'segments');
+      return result;
+
+    } catch (error) {
+      console.warn('WOPR AI CLASSIFIER: failed, falling back to heuristics:', error);
+      throw error;
+    }
+  }
+
+  private async callOpenAIStructured(userMessage: string): Promise<{ role: 'system' | 'assistant'; content: string }[]> {
+    const raw = await this.callOpenAI(userMessage);
+    const parsed = this.parseStructuredAiOutput(raw);
+    if (parsed.valid) {
+      return parsed.messages;
+    }
+    
+    // Fallback tier 1: Try AI-powered classifier (if enabled and API key available)
+    if (this.settings.useAiClassifier && this.settingsService.hasApiKey()) {
+      try {
+        const aiClassified = await this.classifyWithAI(raw);
+        console.debug('WOPR STRUCTURED FALLBACK: AI classifier successful, segments=', aiClassified.length);
+        return aiClassified;
+      } catch (error) {
+        console.debug('WOPR STRUCTURED FALLBACK: AI classifier failed, trying heuristic split');
+      }
+    }
+    
+    // Fallback tier 2: Try smart content splitting to separate mixed data+questions
+    const splitResult = this.splitMixedContent(raw);
+    if (splitResult.length > 1) {
+      console.debug('WOPR STRUCTURED FALLBACK: smart split successful, segments=', splitResult.length);
+      return splitResult;
+    }
+    
+    // Final fallback: use heuristic classification on entire raw output
+    const fallbackRole = this.classifyAiResponse(raw);
+    console.debug('WOPR STRUCTURED FALLBACK reason=', parsed.error, 'role=', fallbackRole, 'len=', raw.length);
+    return [{ role: fallbackRole, content: raw }];
+  }
+
+  /**
+   * Classify an AI (assistant) response as either a conversational WOPR message
+   * or a system/status style message. Returns the role to use for display.
+   * Heuristics (kept intentionally lightweight / client-only):
+   * - System if starts with known status keywords (WOPR SYSTEM, OPENAI, API KEY, LAUNCH CODE, EXECUTING, VALIDATING, WARNING, ERROR, CONNECTION, MODEM, VOICE, TERMINAL, CITY MARKERS, WORLD MAP, MISSILE)
+   * - System if >= 2 lines containing ':' (key/value listing) OR >= 3 fully uppercase lines (excluding very short lines)
+   * - System if >60% of all A-Z characters are uppercase and total letters > 40
+   * - Otherwise assistant
+   */
+  private classifyAiResponse(content: string): 'assistant' | 'system' {
+    if (!content) return 'assistant';
+    const trimmed = content.trim();
+    const upperStartKeywords = [
+      'WOPR SYSTEM', 'OPENAI', 'API KEY', 'LAUNCH CODE', 'EXECUTING', 'VALIDATING',
+      'WARNING', 'ERROR', 'CONNECTION', 'MODEM', 'VOICE', 'TERMINAL', 'CITY MARKERS',
+      'WORLD MAP', 'MISSILE', 'FUNCTION CALL', 'SYSTEM STATUS'
+    ];
+    const startsUpper = upperStartKeywords.some(k => trimmed.toUpperCase().startsWith(k));
+    const lines = trimmed.split(/\r?\n/).filter(l => l.length > 0);
+    const colonLines = lines.filter(l => l.includes(':')).length;
+    const uppercaseLines = lines.filter(l => {
+      const letters = l.replace(/[^A-Za-z]/g, '');
+      if (letters.length < 4) return false;
+      return letters === letters.toUpperCase();
+    }).length;
+    const lettersAll = trimmed.replace(/[^A-Za-z]/g, '');
+    const uppercaseRatio = lettersAll.length ? lettersAll.replace(/[^A-Z]/g, '').length / lettersAll.length : 0;
+    // Conversational cues: question marks, lowercase sentences
+    const hasQuestion = /\?/.test(trimmed) && /\?$/.test(trimmed.split(/\n/).pop() || '');
+    const conversationalIndicators = hasQuestion || /\b(let's|shall we|you think|do you)\b/i.test(trimmed);
+
+    if (startsUpper || colonLines >= 2 || uppercaseLines >= 3 || (uppercaseRatio > 0.6 && lettersAll.length > 40)) {
+      // If there are strong system indicators but also clear conversational end-question, bias toward assistant only if indicators are weak
+      if (conversationalIndicators && colonLines < 2 && uppercaseLines < 3) {
+        return 'assistant';
+      }
+      return 'system';
+    }
+    return 'assistant';
   }
 
   private async handleToolCalls(toolCalls: WoprToolCall[], assistantMessage: string): Promise<string> {
@@ -941,6 +1250,19 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
     this.focusInput();
   }
 
+  async toggleAiClassifier() {
+    const newValue = this.settingsService.toggleAiClassifier();
+    
+    // Announce the change
+    const status = newValue ? 'ENABLED' : 'DISABLED';
+    const method = newValue ? 'AI-POWERED ANALYSIS' : 'HEURISTIC PATTERNS';
+    await this.addSystemMessage(`CONTENT CLASSIFIER ${status}`);
+    await this.addSystemMessage(`CLASSIFICATION METHOD: ${method}`);
+    
+    // Return focus to input
+    this.focusInput();
+  }
+
   initializeCityMarkers() {
     // Generate city threat markers from missile targets
     this.cityThreats = [
@@ -1045,7 +1367,7 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
           // WOPR can now greet the user since API is working
           await this.typeMessage('GREETINGS PROFESSOR FALKEN.', 'assistant');
           await this.delay(800);
-          await this.typeMessage('WOPR SYSTEMS FULLY OPERATIONAL.', 'assistant');
+          await this.typeMessage('WOPR SYSTEMS FULLY OPERATIONAL.', this.classifyAiResponse('WOPR SYSTEMS FULLY OPERATIONAL.'));
           await this.delay(800);
           await this.typeMessage('SHALL WE PLAY A GAME?', 'assistant');
         } else {
@@ -1155,6 +1477,11 @@ When appropriate, offer to run system diagnostics, play games, or simulate scena
       case '/gps':
         await this.testLocationLookup();
         break;
+
+      case '/aiclassifier':
+      case '/classifier':
+        await this.toggleAiClassifier();
+        break;
       
       default:
         await this.typeMessage(`UNKNOWN COMMAND: ${command}
@@ -1178,6 +1505,7 @@ BASIC COMMANDS:
 /beep, /audio - Toggle terminal beep sounds  
 /dialup, /modem - Toggle dial-up modem sounds
 /tension, /music - Toggle launch code computer beeps
+/aiclassifier, /classifier - Toggle AI vs heuristic content classification
 /status       - Show current system status
 /reset        - Reset WOPR systems
 /clear        - Clear terminal screen

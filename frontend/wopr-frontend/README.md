@@ -120,3 +120,18 @@ The interface adapts to different screen sizes while maintaining the authentic C
 ---
 
 *"Shall we play a game?"* - WOPR, WarGames (1983)
+
+## 🧠 AI Message Role Classification
+
+The interface now distinguishes between two AI-originated roles for clarity:
+
+- `SYSTEM:` Used for status outputs, validation results, configuration listings, errors, function execution summaries, and other diagnostic or structured blocks.
+- `WOPR:` Used for conversational, character-driven dialogue consistent with the film personality.
+
+Heuristic classification runs client-side after each OpenAI response:
+- Detects uppercase/system preambles (e.g., `OPENAI`, `VALIDATING`, `ERROR`, `WOPR SYSTEM`)
+- Counts structured lines containing `:` or multiple fully uppercase lines
+- Measures uppercase density for block-style status dumps
+- Falls back to `WOPR` when conversational cues (questions, invitations, natural phrasing) are present
+
+This keeps immersive character interactions while cleanly separating operational feedback.
